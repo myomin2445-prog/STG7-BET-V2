@@ -94,6 +94,66 @@ Loading...
 <div class="footer">
 STG7 BET TRACKER
 </div>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const dateBox = document.getElementById("dateBox");
+const matchTable = document.getElementById("matchTable");
+
+onSnapshot(collection(db, "matches"), (snapshot) => {
+  let html = "";
+  let currentDate = "";
+
+  if (snapshot.empty) {
+    dateBox.innerText = "STG7 BET V2";
+    matchTable.innerHTML = "<tr><td colspan='6'>No matches yet</td></tr>";
+    return;
+  }
+
+  snapshot.forEach((doc) => {
+    const m = doc.data();
+
+    if (m.date) currentDate = m.date;
+
+    html += `
+      <tr>
+        <td><b>${m.kr || ""}</b></td>
+        <td class="red">${m.body || ""}</td>
+        <td class="team">${m.home || ""}</td>
+        <td>${m.result || ""}</td>
+        <td class="team">${m.away || ""}</td>
+        <td class="red">${m.goal || ""}</td>
+      </tr>
+    `;
+  });
+
+  dateBox.innerText = currentDate || "STG7 BET V2";
+  matchTable.innerHTML = html;
+
+}, (error) => {
+  dateBox.innerText = "Firebase Error";
+  matchTable.innerHTML = `<tr><td colspan="6">${error.message}</td></tr>`;
+});
+
+</script>
 </body>
 </html>
