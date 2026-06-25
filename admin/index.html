@@ -5,10 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STG7 Admin</title>
 <style>
-body{font-family:Arial;background:#111;color:#fff;max-width:500px;margin:auto;padding:20px}
+body{font-family:Arial;background:#111;color:#fff;max-width:520px;margin:auto;padding:20px}
 h2{text-align:center}
-input{width:100%;padding:12px;margin:8px 0;font-size:16px;box-sizing:border-box}
-button{width:100%;padding:15px;background:#0066ff;color:white;border:none;font-size:18px}
+input{width:100%;padding:12px;margin:7px 0;font-size:16px;box-sizing:border-box}
+button{width:100%;padding:14px;margin-top:8px;color:white;border:none;font-size:17px;border-radius:4px}
+#saveBtn{background:#0066ff}
+#cancelBtn{background:#666;display:none}
+.card{background:#222;margin-top:12px;padding:12px;border-radius:8px}
+.row{line-height:1.7}
+.edit{background:#ff9800}
+.del{background:#e60000}
+.small{font-size:13px;color:#bbb}
 </style>
 </head>
 <body>
@@ -21,13 +28,24 @@ button{width:100%;padding:15px;background:#0066ff;color:white;border:none;font-s
 <input id="home" placeholder="HOME">
 <input id="result" placeholder="RESULT">
 <input id="away" placeholder="AWAY">
-<input id="goal" placeholder="GOAL">
+<input id="goal" placeholder="GOAL+">
 
 <button id="saveBtn">SAVE</button>
+<button id="cancelBtn">CANCEL EDIT</button>
+
+<div id="list"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -41,21 +59,123 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-document.getElementById("saveBtn").onclick = async function(){
-  try{
-    await addDoc(collection(db,"matches"),{
-      date: document.getElementById("date").value,
-      kr: document.getElementById("kr").value,
-      body: document.getElementById("body").value,
-      home: document.getElementById("home").value,
-      result: document.getElementById("result").value,
-      away: document.getElementById("away").value,
-      goal: document.getElementById("goal").value
-    });
+const dateEl = document.getElementById("date");
+const krEl = document.getElementById("kr");
+const bodyEl = document.getElementById("body");
+const homeEl = document.getElementById("home");
+const resultEl = document.getElementById("result");
+const awayEl = document.getElementById("away");
+const goalEl = document.getElementById("goal");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const list = document.getElementById("list");
 
-    alert("SAVE SUCCESS");
+let editId = null;
+
+function clearForm(){
+  dateEl.value = "";
+  krEl.value = "";
+  bodyEl.value = "";
+  homeEl.value = "";
+  resultEl.value = "";
+  awayEl.value = "";
+  goalEl.value = "";
+  editId = null;
+  saveBtn.innerText = "SAVE";
+  cancelBtn.style.display = "none";
+}
+
+function getFormData(){
+  return {
+    date: dateEl.value,
+    kr: krEl.value,
+    body: bodyEl.value,
+    home: homeEl.value,
+    result: resultEl.value,
+    away: awayEl.value,
+    goal: goalEl.value
+  };
+}
+
+saveBtn.onclick = async function(){
+  try{
+    const data = getFormData();
+
+    if(editId){
+      await updateDoc(doc(db,"matches",editId),data);
+      alert("UPDATE SUCCESS");
+    }else{
+      await addDoc(collection(db,"matches"),data);
+      alert("SAVE SUCCESS");
+    }
+
+    clearForm();
   }catch(error){
     alert("ERROR: " + error.message);
+  }
+};
+
+cancelBtn.onclick = clearForm;
+
+onSnapshot(collection(db,"matches"),(snapshot)=>{
+  let html = "";
+
+  if(snapshot.empty){
+    list.innerHTML = "<p class='small'>No matches yet</p>";
+    return;
+  }
+
+  snapshot.forEach((d)=>{
+    const m = d.data();
+
+    html += `
+      <div class="card">
+        <div class="row"><b>${m.kr || ""}</b> | BODY: ${m.body || ""}</div>
+        <div class="row">${m.home || ""} VS ${m.away || ""}</div>
+        <div class="row">Result: ${m.result || ""}</div>
+        <div class="row">GOAL+: ${m.goal || ""}</div>
+        <div class="small">Date: ${m.date || ""}</div>
+
+        <button class="edit" onclick="editMatch('${d.id}')">EDIT</button>
+        <button class="del" onclick="deleteMatch('${d.id}')">DELETE</button>
+      </div>
+    `;
+  });
+
+  list.innerHTML = html;
+});
+
+window.editMatch = async function(id){
+  editId = id;
+
+  const cards = [];
+  onSnapshot(collection(db,"matches"),(snapshot)=>{
+    snapshot.forEach((d)=>{
+      if(d.id === id){
+        const m = d.data();
+        dateEl.value = m.date || "";
+        krEl.value = m.kr || "";
+        bodyEl.value = m.body || "";
+        homeEl.value = m.home || "";
+        resultEl.value = m.result || "";
+        awayEl.value = m.away || "";
+        goalEl.value = m.goal || "";
+        saveBtn.innerText = "UPDATE";
+        cancelBtn.style.display = "block";
+        window.scrollTo(0,0);
+      }
+    });
+  });
+};
+
+window.deleteMatch = async function(id){
+  if(confirm("Delete this match?")){
+    try{
+      await deleteDoc(doc(db,"matches",id));
+      alert("DELETE SUCCESS");
+    }catch(error){
+      alert("ERROR: " + error.message);
+    }
   }
 };
 </script>
