@@ -49,6 +49,46 @@ button{
 <input id="goal" placeholder="GOAL">
 
 <button>SAVE</button>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.querySelector("button").onclick = async () => {
+
+  await addDoc(collection(db,"matches"),{
+
+    date:document.getElementById("date").value,
+    kr:document.getElementById("kr").value,
+    body:document.getElementById("body").value,
+    home:document.getElementById("home").value,
+    result:document.getElementById("result").value,
+    away:document.getElementById("away").value,
+    goal:document.getElementById("goal").value
+
+  });
+
+  alert("SAVE SUCCESS");
+
+};
+
+</script>
 </body>
 </html>
