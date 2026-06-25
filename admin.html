@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STG7 Admin</title>
+<style>
+body{font-family:Arial;background:#111;color:#fff;max-width:500px;margin:auto;padding:20px}
+h2{text-align:center}
+input{width:100%;padding:12px;margin:8px 0;font-size:16px;box-sizing:border-box}
+button{width:100%;padding:15px;background:#0066ff;color:white;border:none;font-size:18px}
+</style>
+</head>
+<body>
+
+<h2>STG7 ADMIN</h2>
+
+<input id="date" placeholder="Date">
+<input id="kr" placeholder="KR">
+<input id="body" placeholder="BODY">
+<input id="home" placeholder="HOME">
+<input id="result" placeholder="RESULT">
+<input id="away" placeholder="AWAY">
+<input id="goal" placeholder="GOAL">
+
+<button id="saveBtn">SAVE</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("saveBtn").onclick = async function(){
+  try{
+    await addDoc(collection(db,"matches"),{
+      date: document.getElementById("date").value,
+      kr: document.getElementById("kr").value,
+      body: document.getElementById("body").value,
+      home: document.getElementById("home").value,
+      result: document.getElementById("result").value,
+      away: document.getElementById("away").value,
+      goal: document.getElementById("goal").value
+    });
+
+    alert("SAVE SUCCESS");
+  }catch(error){
+    alert("ERROR: " + error.message);
+  }
+};
+</script>
+
+</body>
+</html>
