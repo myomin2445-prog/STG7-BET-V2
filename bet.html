@@ -20,21 +20,41 @@ button{background:#00a000;color:white;font-weight:bold}
 .small{color:#bbb;font-size:13px}
 .goal{color:#ffdf00;font-weight:bold}
 .odds{color:#00ff9d;font-weight:bold}
-.user{font-size:13px;color:#00ff9d;text-align:center}
+.user{font-size:14px;color:#00ff9d;text-align:center;margin-bottom:8px}
+.balance{font-size:18px;color:#ffdf00;text-align:center;font-weight:bold;margin-bottom:15px}
 </style>
 </head>
 
 <body>
 <div class="box">
 <h2>🎫 STG7 SINGLE BET</h2>
+
 <div class="user" id="userBox">Checking login...</div>
-<div id="matchList"><p class="small">Loading matches...</p></div>
+<div class="balance" id="balanceBox">Balance: Loading...</div>
+
+<div id="matchList">
+<p class="small">Loading matches...</p>
+</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -50,8 +70,15 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let currentUser = null;
+let currentBalance = 0;
+
 const matchList = document.getElementById("matchList");
 const userBox = document.getElementById("userBox");
+const balanceBox = document.getElementById("balanceBox");
+
+function showBalance(amount){
+  balanceBox.innerText = "Balance: " + Number(amount || 0).toLocaleString() + " Ks";
+}
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -59,8 +86,21 @@ onAuthStateChanged(auth, (user) => {
     location.href = "login.html";
     return;
   }
+
   currentUser = user;
   userBox.innerText = "Login: " + user.email;
+
+  const userRef = doc(db, "users", user.uid);
+
+  onSnapshot(userRef, (snap) => {
+    if (snap.exists()) {
+      currentBalance = Number(snap.data().balance || 0);
+      showBalance(currentBalance);
+    } else {
+      currentBalance = 0;
+      showBalance(0);
+    }
+  });
 });
 
 window.openBet = function(id){
@@ -85,31 +125,50 @@ window.saveBet = async function(id){
 
   const m = window.matchesData.find(x => x.id === id);
   const betType = document.getElementById("betType_" + id).value;
-  const stake = document.getElementById("stake_" + id).value;
+  const stake = Number(document.getElementById("stake_" + id).value || 0);
 
-  if(!stake){
+  if(!stake || stake <= 0){
     alert("လောင်းငွေထည့်ပါ");
     return;
   }
 
   try{
+    const userRef = doc(db, "users", currentUser.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      alert("User wallet မတွေ့ပါ");
+      return;
+    }
+
+    const balance = Number(userSnap.data().balance || 0);
+
+    if (balance < stake) {
+      alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
+      return;
+    }
+
     await addDoc(collection(db,"bets"),{
       userId: currentUser.uid,
       userEmail: currentUser.email,
 
       matchId: id,
       match: (m.home || "") + " vs " + (m.away || ""),
-      league: m.body || "",
+      league: m.league || m.body || "",
       date: m.date || "",
-      time: m.kr || "",
+      time: m.time || m.kr || "",
       home: m.home || "",
       away: m.away || "",
       betType: betType,
       goal: m.goal || "",
-      odds: m.body || "",
+      odds: m.odds || m.body || "",
       stake: stake,
       status: "Pending",
       createdAt: serverTimestamp()
+    });
+
+    await updateDoc(userRef, {
+      balance: balance - stake
     });
 
     alert("BET SAVED SUCCESS");
@@ -130,22 +189,22 @@ onSnapshot(collection(db,"matches"),(snapshot)=>{
     return;
   }
 
-  snapshot.forEach((doc)=>{
-    const m = { id: doc.id, ...doc.data() };
+  snapshot.forEach((docSnap)=>{
+    const m = { id: docSnap.id, ...docSnap.data() };
     window.matchesData.push(m);
 
     html += `
       <div class="card">
         <div class="match">⚽ ${m.home || ""} vs ${m.away || ""}</div>
-        <div class="info">🏆 ${m.body || "League"}</div>
-        <div class="info">📅 ${m.date || ""} ⏰ ${m.kr || ""}</div>
+        <div class="info">🏆 ${m.league || m.body || "League"}</div>
+        <div class="info">📅 ${m.date || ""} ⏰ ${m.time || m.kr || ""}</div>
         <div class="info goal">ဂိုးလိုင်း: ${m.goal || "-"}</div>
-        <div class="info odds">ပေါက်ကြေး: ${m.body || "-"}</div>
+        <div class="info odds">ပေါက်ကြေး: ${m.odds || m.body || "-"}</div>
 
-        <button onclick="openBet('${doc.id}')">BET</button>
+        <button onclick="openBet('${docSnap.id}')">BET</button>
 
-        <div class="betForm" id="form_${doc.id}" style="display:none">
-          <select id="betType_${doc.id}">
+        <div class="betForm" id="form_${docSnap.id}" style="display:none">
+          <select id="betType_${docSnap.id}">
             <option value="Over">Over</option>
             <option value="Under">Under</option>
             <option value="Home">Home</option>
@@ -153,21 +212,21 @@ onSnapshot(collection(db,"matches"),(snapshot)=>{
             <option value="Draw">Draw</option>
           </select>
 
-          <input id="stake_${doc.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
+          <input id="stake_${docSnap.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
 
           <div class="quick">
-            <button onclick="quickStake('${doc.id}',10000)">10,000</button>
-            <button onclick="quickStake('${doc.id}',20000)">20,000</button>
-            <button onclick="quickStake('${doc.id}',50000)">50,000</button>
-            <button onclick="quickStake('${doc.id}',100000)">100,000</button>
-            <button onclick="quickStake('${doc.id}',200000)">200,000</button>
-            <button onclick="quickStake('${doc.id}',500000)">500,000</button>
-            <button onclick="quickStake('${doc.id}',1000000)">1,000,000</button>
-            <button onclick="quickStake('${doc.id}',2000000)">2,000,000</button>
+            <button onclick="quickStake('${docSnap.id}',10000)">10,000</button>
+            <button onclick="quickStake('${docSnap.id}',20000)">20,000</button>
+            <button onclick="quickStake('${docSnap.id}',50000)">50,000</button>
+            <button onclick="quickStake('${docSnap.id}',100000)">100,000</button>
+            <button onclick="quickStake('${docSnap.id}',200000)">200,000</button>
+            <button onclick="quickStake('${docSnap.id}',500000)">500,000</button>
+            <button onclick="quickStake('${docSnap.id}',1000000)">1,000,000</button>
+            <button onclick="quickStake('${docSnap.id}',2000000)">2,000,000</button>
           </div>
 
-          <button onclick="saveBet('${doc.id}')">CONFIRM BET</button>
-          <button class="close" onclick="closeBet('${doc.id}')">CANCEL</button>
+          <button onclick="saveBet('${docSnap.id}')">CONFIRM BET</button>
+          <button class="close" onclick="closeBet('${docSnap.id}')">CANCEL</button>
         </div>
       </div>
     `;
