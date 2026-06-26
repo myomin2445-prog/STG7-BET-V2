@@ -7,13 +7,19 @@
 <style>
 body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:15px}
 .box{max-width:520px;margin:auto}
-h2{text-align:center;color:#fff}
+h2{text-align:center}
 .card{background:#1b1b1b;padding:15px;border-radius:12px;margin:12px 0}
+.match{font-size:20px;font-weight:bold}
+.info{color:#bbb;margin:5px 0}
 input,select,button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
 button{background:#00a000;color:white;font-weight:bold}
+.betForm{background:#222;padding:12px;border-radius:10px;margin-top:10px}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .quick button{background:#333}
+.close{background:#555}
 .small{color:#bbb;font-size:13px}
+.goal{color:#ffdf00;font-weight:bold}
+.odds{color:#00ff9d;font-weight:bold}
 </style>
 </head>
 
@@ -22,38 +28,21 @@ button{background:#00a000;color:white;font-weight:bold}
 
 <h2>🎫 STG7 SINGLE BET</h2>
 
-<div class="card">
-  <input id="match" placeholder="Match - Liverpool vs Chelsea">
-  <input id="league" placeholder="League - Premier League">
-
-  <select id="betType">
-    <option value="Over">Over</option>
-    <option value="Under">Under</option>
-    <option value="Home">Home</option>
-    <option value="Away">Away</option>
-    <option value="Draw">Draw</option>
-  </select>
-
-  <input id="goal" placeholder="ဂိုးလိုင်း ဥပမာ 2.5+50">
-  <input id="odds" placeholder="ပေါက်ကြေး ဥပမာ 3+80 / =40 / 2-80">
-  <input id="stake" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
-
-  <div class="quick">
-    <button onclick="setStake(10000)">10000</button>
-    <button onclick="setStake(20000)">20000</button>
-    <button onclick="setStake(50000)">50000</button>
-    <button onclick="setStake(100000)">100000</button>
-  </div>
-
-  <button id="betBtn">BET NOW</button>
-  <p class="small">Status: Pending အနေနဲ့ သိမ်းမယ်</p>
+<div id="matchList">
+<p class="small">Loading matches...</p>
 </div>
 
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -67,28 +56,118 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+let selectedMatch = null;
+
+const matchList = document.getElementById("matchList");
+
 window.setStake = function(amount){
   document.getElementById("stake").value = amount;
 };
 
-document.getElementById("betBtn").onclick = async function(){
+window.openBet = function(id){
+  selectedMatch = window.matchesData.find(m => m.id === id);
+
+  document.querySelectorAll(".betForm").forEach(f => f.style.display = "none");
+
+  const form = document.getElementById("form_" + id);
+  form.style.display = "block";
+};
+
+window.closeBet = function(id){
+  document.getElementById("form_" + id).style.display = "none";
+};
+
+window.saveBet = async function(id){
+  const m = window.matchesData.find(x => x.id === id);
+
+  const betType = document.getElementById("betType_" + id).value;
+  const stake = document.getElementById("stake_" + id).value;
+
+  if(!stake){
+    alert("လောင်းငွေထည့်ပါ");
+    return;
+  }
+
   try{
     await addDoc(collection(db,"bets"),{
-      match: document.getElementById("match").value,
-      league: document.getElementById("league").value,
-      betType: document.getElementById("betType").value,
-      goal: document.getElementById("goal").value,
-      odds: document.getElementById("odds").value,
-      stake: document.getElementById("stake").value,
+      matchId: id,
+      match: (m.home || "") + " vs " + (m.away || ""),
+      league: m.body || "",
+      date: m.date || "",
+      time: m.kr || "",
+      home: m.home || "",
+      away: m.away || "",
+      betType: betType,
+      goal: m.goal || "",
+      odds: m.body || "",
+      stake: stake,
       status: "Pending",
       createdAt: serverTimestamp()
     });
 
     alert("BET SAVED SUCCESS");
+    document.getElementById("stake_" + id).value = "";
+    closeBet(id);
+
   }catch(error){
     alert("ERROR: " + error.message);
   }
 };
+
+window.quickStake = function(id, amount){
+  document.getElementById("stake_" + id).value = amount;
+};
+
+onSnapshot(collection(db,"matches"),(snapshot)=>{
+  window.matchesData = [];
+  let html = "";
+
+  if(snapshot.empty){
+    matchList.innerHTML = "<p class='small'>No matches yet</p>";
+    return;
+  }
+
+  snapshot.forEach((doc)=>{
+    const m = { id: doc.id, ...doc.data() };
+    window.matchesData.push(m);
+
+    html += `
+      <div class="card">
+        <div class="match">⚽ ${m.home || ""} vs ${m.away || ""}</div>
+        <div class="info">🏆 ${m.body || "League"}</div>
+        <div class="info">📅 ${m.date || ""} ⏰ ${m.kr || ""}</div>
+        <div class="info goal">ဂိုးလိုင်း: ${m.goal || "-"}</div>
+        <div class="info odds">ပေါက်ကြေး: ${m.body || "-"}</div>
+
+        <button onclick="openBet('${doc.id}')">BET</button>
+
+        <div class="betForm" id="form_${doc.id}" style="display:none">
+          <select id="betType_${doc.id}">
+            <option value="Over">Over</option>
+            <option value="Under">Under</option>
+            <option value="Home">Home</option>
+            <option value="Away">Away</option>
+            <option value="Draw">Draw</option>
+          </select>
+
+          <input id="stake_${doc.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
+
+          <div class="quick">
+            <button onclick="quickStake('${doc.id}',10000)">10000</button>
+            <button onclick="quickStake('${doc.id}',20000)">20000</button>
+            <button onclick="quickStake('${doc.id}',50000)">50000</button>
+            <button onclick="quickStake('${doc.id}',100000)">100000</button>
+          </div>
+
+          <button onclick="saveBet('${doc.id}')">CONFIRM BET</button>
+          <button class="close" onclick="closeBet('${doc.id}')">CANCEL</button>
+        </div>
+      </div>
+    `;
+  });
+
+  matchList.innerHTML = html;
+});
 </script>
 
 </body>
