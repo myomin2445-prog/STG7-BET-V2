@@ -14,13 +14,14 @@ a{color:#00ff9d}
 .small{text-align:center;color:#bbb}
 </style>
 </head>
-<body>
 
+<body>
 <div class="box">
 <h2>📝 STG7 REGISTER</h2>
 
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
+
 <button id="registerBtn">REGISTER</button>
 
 <p class="small">
@@ -30,8 +31,18 @@ Already have account? <a href="login.html">Login</a>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -46,16 +57,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-document.getElementById("registerBtn").onclick = async ()=>{
-  const email = document.getElementById("email").value;
+document.getElementById("registerBtn").onclick = async () => {
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  try{
-    const userCred = await createUserWithEmailAndPassword(auth,email,password);
+  if(!email || !password){
+    alert("Email နဲ့ Password ထည့်ပါ");
+    return;
+  }
 
-    await setDoc(doc(db,"users",userCred.user.uid),{
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
+
+    await setDoc(doc(db, "users", uid), {
+      uid: uid,
       email: email,
-      balance: 0,
+      balance: 100000,
       role: "user",
       createdAt: serverTimestamp()
     });
