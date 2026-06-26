@@ -69,12 +69,55 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const list = document.getElementById("list");
 
-const q = query(collection(db, "bets"), orderBy("createdAt", "desc"));
+onAuthStateChanged(auth, (user) => {
 
-onSnapshot(q, (snapshot) => {
+  if (!user) {
+    location.href = "login.html";
+    return;
+  }
 
+  const q = query(
+    collection(db, "bets"),
+    where("userId", "==", user.uid),
+    orderBy("createdAt", "desc")
+  );
+
+  onSnapshot(q, (snapshot) => {
+
+    list.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+
+      const bet = doc.data();
+
+      let color = "yellow";
+      if (bet.status == "Won") color = "lime";
+      if (bet.status == "Lost") color = "red";
+
+      list.innerHTML += `
+      <div class="card">
+
+      <div class="match">
+      ⚽ ${bet.match || "-"}
+      </div>
+
+      <p>🏆 League : ${bet.league || "-"}</p>
+      <p>🎯 Bet : ${bet.betType}</p>
+      <p>🥅 Goal : ${bet.goal}</p>
+      <p>💰 Odds : ${bet.odds}</p>
+      <p>💵 Stake : ${Number(bet.stake).toLocaleString()} Ks</p>
+
+      <div class="status" style="color:${color}">
+      ${bet.status}
+      </div>
+
+      </div>`;
+    });
+
+  });
+
+});
   list.innerHTML = "";
 
   snapshot.forEach((doc) => {
