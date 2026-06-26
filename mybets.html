@@ -47,6 +47,71 @@ h2{
 <h2>🎫 MY BETS</h2>
 
 <div id="list"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+const q = query(collection(db, "bets"), orderBy("createdAt", "desc"));
+
+onSnapshot(q, (snapshot) => {
+
+  list.innerHTML = "";
+
+  snapshot.forEach((doc) => {
+
+    const bet = doc.data();
+
+    let color = "yellow";
+
+    if (bet.status == "Won") color = "lime";
+    if (bet.status == "Lost") color = "red";
+
+    list.innerHTML += `
+      <div class="card">
+
+      <div class="match">
+      ⚽ ${bet.match || "-"}
+      </div>
+
+      <p>🏆 League : ${bet.league || "-"}</p>
+
+      <p>🎯 Bet : ${bet.betType}</p>
+
+      <p>🥅 Goal : ${bet.goal}</p>
+
+      <p>💰 Odds : ${bet.odds}</p>
+
+      <p>💵 Stake : ${Number(bet.stake).toLocaleString()} Ks</p>
+
+      <div class="status" style="color:${color}">
+      ${bet.status}
+      </div>
+
+      </div>
+    `;
+  });
+
+});
+</script>
 </body>
 </html>
