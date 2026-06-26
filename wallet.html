@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STG7 Wallet</title>
+<style>
+body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:15px}
+.box{max-width:520px;margin:auto}
+h2{text-align:center}
+.card{background:#1d1d1d;padding:18px;border-radius:14px;margin:12px 0}
+.balance{font-size:32px;color:#ffdf00;font-weight:bold;text-align:center}
+.small{color:#bbb;font-size:14px}
+.row{display:flex;justify-content:space-between;margin:10px 0;font-size:18px}
+.green{color:#00ff66}.red{color:#ff4444}.yellow{color:#ffdf00}
+button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:9px;background:#00a000;color:white;font-weight:bold;font-size:16px}
+.logout{background:#555}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#181818;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px 0}
+.nav a{text-align:center;color:white;text-decoration:none;font-size:13px}
+</style>
+</head>
+
+<body>
+<div class="box">
+<h2>💰 STG7 WALLET</h2>
+
+<p class="small" id="userBox">Checking...</p>
+
+<div class="card">
+  <p class="small" style="text-align:center">Current Balance</p>
+  <div class="balance" id="balanceBox">0 Ks</div>
+</div>
+
+<div class="card">
+  <div class="row"><span>📉 Total Bet</span><b id="totalBet">0 Ks</b></div>
+  <div class="row"><span>📈 Total Won</span><b class="green" id="totalWon">0 Ks</b></div>
+  <div class="row"><span>🟡 Pending</span><b class="yellow" id="pendingBet">0 Ks</b></div>
+  <div class="row"><span>🔴 Lost</span><b class="red" id="lostBet">0 Ks</b></div>
+</div>
+
+<div class="card">
+  <button onclick="location.href='bet.html'">⚽ BET NOW</button>
+  <button onclick="location.href='mybets.html'">🎫 MY BETS</button>
+  <button class="logout" id="logoutBtn">LOGOUT</button>
+</div>
+
+<div class="card">
+  <h3>📜 Wallet History</h3>
+  <div id="historyList" class="small">Loading...</div>
+</div>
+</div>
+
+<div class="nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="bet.html">⚽<br>Bet</a>
+  <a href="mybets.html">🎫<br>My Bets</a>
+  <a href="wallet.html">💰<br>Wallet</a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import {
+  getFirestore, doc, onSnapshot, collection, query, where, orderBy
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const money = n => Number(n || 0).toLocaleString() + " Ks";
+
+onAuthStateChanged(auth, user=>{
+  if(!user){
+    location.href="login.html";
+    return;
+  }
+
+  document.getElementById("userBox").innerText = "Login: " + user.email;
+
+  onSnapshot(doc(db,"users",user.uid), snap=>{
+    if(snap.exists()){
+      document.getElementById("balanceBox").innerText = money(snap.data().balance);
+    }
+  });
+
+  const q = query(
+    collection(db,"bets"),
+    where("userId","==",user.uid),
+    orderBy("createdAt","desc")
+  );
+
+  onSnapshot(q, snap=>{
+    let totalBet = 0;
+    let totalWon = 0;
+    let pending = 0;
+    let lost = 0;
+    let html = "";
+
+    snap.forEach(d=>{
+      const b = d.data();
+      const stake = Number(b.stake || 0);
+      const win = Number(b.winAmount || 0);
+
+      totalBet += stake;
+      if(b.status === "Won") totalWon += win;
+      if(b.status === "Pending") pending += stake;
+      if(b.status === "Lost") lost += stake;
+
+      html += `
+        <div style="border-bottom:1px solid #333;padding:8px 0">
+          ⚽ ${b.match || "-"}<br>
+          Stake: ${money(stake)}<br>
+          Status: ${b.status || "Pending"}<br>
+          Win: ${money(win)}
+        </div>
+      `;
+    });
+
+    document.getElementById("totalBet").innerText = money(totalBet);
+    document.getElementById("totalWon").innerText = money(totalWon);
+    document.getElementById("pendingBet").innerText = money(pending);
+    document.getElementById("lostBet").innerText = money(lost);
+    document.getElementById("historyList").innerHTML = html || "No history yet";
+  });
+});
+
+document.getElementById("logoutBtn").onclick = async ()=>{
+  await signOut(auth);
+  location.href="login.html";
+};
+</script>
+
+</body>
+</html>
