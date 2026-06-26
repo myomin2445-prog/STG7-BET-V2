@@ -3,47 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STG7 Admin</title>
+<title>STG7 Match Admin</title>
 <style>
-body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial;padding:14px}
-.box{max-width:520px;margin:auto}
+body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:14px}
+.box{max-width:620px;margin:auto}
 h2{text-align:center}
-input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:0;box-sizing:border-box}
-button{width:100%;padding:13px;margin:6px 0;border:0;border-radius:8px;color:white;font-weight:bold}
-.login{background:#0066ff}.save{background:#00a000}.update{background:#ff9800}.del{background:#d40000}.edit{background:#555}.logout{background:#444}
-.card{background:#1d1d1d;margin:10px 0;padding:12px;border-radius:10px}
+input,select,button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
+button{color:white;font-weight:bold}
+.login{background:#0066ff}.logout{background:#444}.save{background:#00a000}.update{background:#ff9800}.edit{background:#555}.del{background:#d40000}
+.card{background:#1d1d1d;padding:15px;border-radius:12px;margin:12px 0}
 .hidden{display:none}
 .small{color:#bbb;font-size:13px}
+.open{color:#00ff66}.closed{color:#ff4444}
 </style>
 </head>
-<body>
 
+<body>
 <div class="box">
 
 <div id="loginBox">
-<h2>🔐 STG7 Admin Login</h2>
+<h2>🔐 MATCH ADMIN LOGIN</h2>
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 <button class="login" id="loginBtn">LOGIN</button>
 </div>
 
 <div id="adminBox" class="hidden">
-<h2>⚽ STG7 Admin</h2>
+<h2>⚽ MATCH MANAGER</h2>
 <button class="logout" id="logoutBtn">LOGOUT</button>
 
-<input id="date" placeholder="Date">
-<input id="kr" placeholder="KR">
-<input id="body" placeholder="BODY">
-<input id="home" placeholder="HOME">
-<input id="result" placeholder="RESULT">
-<input id="away" placeholder="AWAY">
-<input id="goal" placeholder="GOAL+">
+<input id="league" placeholder="League">
+<input id="home" placeholder="Home Team">
+<input id="away" placeholder="Away Team">
+<input id="date" placeholder="Date 27/06/2026">
+<input id="time" placeholder="Time 09:00PM">
+<input id="goal" placeholder="Goal Line ဥပမာ 2.5 / 3+50">
+<input id="odds" placeholder="Odds ဥပမာ =40 / 2-80">
 
-<button class="save" id="saveBtn">SAVE</button>
-<button class="update hidden" id="updateBtn">UPDATE</button>
+<select id="status">
+  <option value="Open">Open</option>
+  <option value="Closed">Closed</option>
+</select>
+
+<button class="save" id="saveBtn">SAVE MATCH</button>
+<button class="update hidden" id="updateBtn">UPDATE MATCH</button>
 
 <input id="search" placeholder="Search match...">
-
 <div id="list"></div>
 </div>
 
@@ -52,7 +57,16 @@ button{width:100%;padding:13px;margin:6px 0;border:0;border-radius:8px;color:whi
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -67,36 +81,37 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let editId = null;
 let allMatches = [];
-
+let editId = null;
 const ids = x => document.getElementById(x);
 
-function data(){
+function getData(){
   return {
-    date: ids("date").value,
-    kr: ids("kr").value,
-    body: ids("body").value,
-    home: ids("home").value,
-    result: ids("result").value,
-    away: ids("away").value,
-    goal: ids("goal").value
+    league: ids("league").value.trim(),
+    home: ids("home").value.trim(),
+    away: ids("away").value.trim(),
+    date: ids("date").value.trim(),
+    time: ids("time").value.trim(),
+    goal: ids("goal").value.trim(),
+    odds: ids("odds").value.trim(),
+    status: ids("status").value
   };
 }
 
 function fill(m){
-  ids("date").value=m.date||"";
-  ids("kr").value=m.kr||"";
-  ids("body").value=m.body||"";
-  ids("home").value=m.home||"";
-  ids("result").value=m.result||"";
-  ids("away").value=m.away||"";
-  ids("goal").value=m.goal||"";
+  ids("league").value = m.league || "";
+  ids("home").value = m.home || "";
+  ids("away").value = m.away || "";
+  ids("date").value = m.date || "";
+  ids("time").value = m.time || "";
+  ids("goal").value = m.goal || "";
+  ids("odds").value = m.odds || "";
+  ids("status").value = m.status || "Open";
 }
 
-function clear(){
+function clearForm(){
   fill({});
-  editId=null;
+  editId = null;
   ids("saveBtn").classList.remove("hidden");
   ids("updateBtn").classList.add("hidden");
 }
@@ -104,7 +119,9 @@ function clear(){
 ids("loginBtn").onclick = async ()=>{
   try{
     await signInWithEmailAndPassword(auth, ids("email").value, ids("password").value);
-  }catch(e){ alert("Login Error: "+e.message); }
+  }catch(e){
+    alert("Login Error: " + e.message);
+  }
 };
 
 ids("logoutBtn").onclick = ()=> signOut(auth);
@@ -115,62 +132,99 @@ onAuthStateChanged(auth, user=>{
 });
 
 ids("saveBtn").onclick = async ()=>{
+  const data = getData();
+
+  if(!data.home || !data.away){
+    alert("Home Team နဲ့ Away Team ထည့်ပါ");
+    return;
+  }
+
   try{
-    await addDoc(collection(db,"matches"), data());
-    clear();
-    alert("SAVE SUCCESS");
-  }catch(e){ alert("Save Error: "+e.message); }
+    await addDoc(collection(db,"matches"),{
+      ...data,
+      createdAt: serverTimestamp()
+    });
+    clearForm();
+    alert("MATCH SAVED");
+  }catch(e){
+    alert("Save Error: " + e.message);
+  }
 };
 
 ids("updateBtn").onclick = async ()=>{
+  if(!editId){
+    alert("Edit match မရွေးရသေးပါ");
+    return;
+  }
+
   try{
-    await updateDoc(doc(db,"matches",editId), data());
-    clear();
-    alert("UPDATE SUCCESS");
-  }catch(e){ alert("Update Error: "+e.message); }
+    await updateDoc(doc(db,"matches",editId), getData());
+    clearForm();
+    alert("MATCH UPDATED");
+  }catch(e){
+    alert("Update Error: " + e.message);
+  }
 };
 
-window.editMatch = (id)=>{
-  const item = allMatches.find(x=>x.id===id);
+window.editMatch = function(id){
+  const item = allMatches.find(x => x.id === id);
   if(!item) return;
-  editId=id;
+
+  editId = id;
   fill(item);
   ids("saveBtn").classList.add("hidden");
   ids("updateBtn").classList.remove("hidden");
   window.scrollTo(0,0);
 };
 
-window.deleteMatch = async (id)=>{
+window.deleteMatch = async function(id){
   if(confirm("Delete this match?")){
-    await deleteDoc(doc(db,"matches",id));
+    try{
+      await deleteDoc(doc(db,"matches",id));
+    }catch(e){
+      alert("Delete Error: " + e.message);
+    }
   }
 };
 
 function render(){
   const q = ids("search").value.toLowerCase();
-  let html="";
+  let html = "";
+
   allMatches
-    .filter(m => (m.home+" "+m.away+" "+m.kr+" "+m.body+" "+m.goal).toLowerCase().includes(q))
-    .forEach(m=>{
-      html += `
-      <div class="card">
-        <b>${m.kr||""}</b> | BODY: ${m.body||""}<br>
-        ${m.home||""} VS ${m.away||""}<br>
-        Result: ${m.result||"-"}<br>
-        GOAL+: ${m.goal||""}<br>
-        <span class="small">Date: ${m.date||""}</span>
-        <button class="edit" onclick="editMatch('${m.id}')">EDIT</button>
-        <button class="del" onclick="deleteMatch('${m.id}')">DELETE</button>
-      </div>`;
-    });
-  ids("list").innerHTML = html || "<p class='small'>No matches</p>";
+  .filter(m => (
+    (m.home||"") + " " +
+    (m.away||"") + " " +
+    (m.league||"") + " " +
+    (m.goal||"") + " " +
+    (m.odds||"") + " " +
+    (m.status||"")
+  ).toLowerCase().includes(q))
+  .forEach(m=>{
+    const statusClass = m.status === "Closed" ? "closed" : "open";
+
+    html += `
+    <div class="card">
+      <b>⚽ ${m.home || "-"} vs ${m.away || "-"}</b>
+      <p>🏆 League : ${m.league || "-"}</p>
+      <p>📅 Date : ${m.date || "-"} | ⏰ ${m.time || "-"}</p>
+      <p>🥅 Goal : ${m.goal || "-"}</p>
+      <p>💰 Odds : ${m.odds || "-"}</p>
+      <p>Status : <b class="${statusClass}">${m.status || "Open"}</b></p>
+
+      <button class="edit" onclick="editMatch('${m.id}')">EDIT</button>
+      <button class="del" onclick="deleteMatch('${m.id}')">DELETE</button>
+    </div>`;
+  });
+
+  ids("list").innerHTML = html || "<p class='small'>No matches found</p>";
 }
 
 ids("search").oninput = render;
 
 onSnapshot(collection(db,"matches"), snap=>{
-  allMatches=[];
-  snap.forEach(d=> allMatches.push({id:d.id,...d.data()}));
+  allMatches = [];
+  snap.forEach(d => allMatches.push({id:d.id,...d.data()}));
   render();
 });
 </script>
