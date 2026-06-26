@@ -55,7 +55,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+  const auth = getAuth(app);
 
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+
+  if (!user) {
+    alert("ကျေးဇူးပြု၍ Login အရင်ဝင်ပါ");
+    location.href = "login.html";
+    return;
+  }
+
+  currentUser = user;
+
+});
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 let selectedMatch = null;
 
 const matchList = document.getElementById("matchList");
