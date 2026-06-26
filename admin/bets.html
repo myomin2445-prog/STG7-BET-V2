@@ -1,9 +1,131 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>STG7 Bet Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STG7 Bets Admin</title>
+<style>
+body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:14px}
+.box{max-width:620px;margin:auto}
+h2{text-align:center}
+input,button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
+button{color:white;font-weight:bold}
+.login{background:#0066ff}.logout{background:#444}.pending{background:#b59b00}.won{background:#00a000}.lost{background:#d40000}
+.card{background:#1d1d1d;padding:15px;border-radius:12px;margin:12px 0}
+.match{font-size:20px;font-weight:bold}
+.small{color:#bbb}
+.hidden{display:none}
+</style>
 </head>
+
 <body>
-<h1>STG7 BET ADMIN</h1>
+<div class="box">
+
+<div id="loginBox">
+<h2>🔐 BET ADMIN LOGIN</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button class="login" id="loginBtn">LOGIN</button>
+</div>
+
+<div id="adminBox" class="hidden">
+<h2>🎫 USER BETS ADMIN</h2>
+<button class="logout" id="logoutBtn">LOGOUT</button>
+<input id="search" placeholder="Search bet...">
+<div id="list"></div>
+</div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let allBets = [];
+const ids = x => document.getElementById(x);
+
+ids("loginBtn").onclick = async ()=>{
+  try{
+    await signInWithEmailAndPassword(auth, ids("email").value, ids("password").value);
+  }catch(e){
+    alert("Login Error: " + e.message);
+  }
+};
+
+ids("logoutBtn").onclick = ()=> signOut(auth);
+
+onAuthStateChanged(auth, user=>{
+  ids("loginBox").classList.toggle("hidden", !!user);
+  ids("adminBox").classList.toggle("hidden", !user);
+});
+
+window.setStatus = async (id,status)=>{
+  try{
+    await updateDoc(doc(db,"bets",id), { status: status });
+    alert("Status updated: " + status);
+  }catch(e){
+    alert("Update Error: " + e.message);
+  }
+};
+
+function render(){
+  const q = ids("search").value.toLowerCase();
+  let html = "";
+
+  allBets
+  .filter(b => (
+    (b.match||"") + " " +
+    (b.league||"") + " " +
+    (b.betType||"") + " " +
+    (b.status||"") + " " +
+    (b.stake||"")
+  ).toLowerCase().includes(q))
+  .forEach(b=>{
+    let color = "yellow";
+    if(b.status === "Won") color = "lime";
+    if(b.status === "Lost") color = "red";
+
+    html += `
+    <div class="card">
+      <div class="match">⚽ ${b.match || "-"}</div>
+      <p>🏆 League : ${b.league || "-"}</p>
+      <p>🎯 Bet : ${b.betType || "-"}</p>
+      <p>🥅 Goal : ${b.goal || "-"}</p>
+      <p>💰 Odds : ${b.odds || "-"}</p>
+      <p>💵 Stake : ${Number(b.stake || 0).toLocaleString()} Ks</p>
+      <p class="small">Status: <b style="color:${color}">${b.status || "Pending"}</b></p>
+
+      <button class="pending" onclick="setStatus('${b.id}','Pending')">PENDING</button>
+      <button class="won" onclick="setStatus('${b.id}','Won')">WON</button>
+      <button class="lost" onclick="setStatus('${b.id}','Lost')">LOST</button>
+    </div>`;
+  });
+
+  ids("list").innerHTML = html || "<p class='small'>No bets found</p>";
+}
+
+ids("search").oninput = render;
+
+onSnapshot(collection(db,"bets"), snap=>{
+  allBets = [];
+  snap.forEach(d=> allBets.push({id:d.id,...d.data()}));
+  render();
+});
+</script>
+
 </body>
 </html>
