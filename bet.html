@@ -9,44 +9,32 @@ body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:15px}
 .box{max-width:520px;margin:auto}
 h2{text-align:center}
 .card{background:#1b1b1b;padding:15px;border-radius:12px;margin:12px 0}
-.match{font-size:20px;font-weight:bold}
-.info{color:#bbb;margin:5px 0}
-input,select,button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
+.match{font-size:22px;font-weight:bold}
+.info{color:#bbb;margin:8px 0;font-size:17px}
+input,select,button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:9px;box-sizing:border-box;font-size:16px}
 button{background:#00a000;color:white;font-weight:bold}
-.betForm{background:#222;padding:12px;border-radius:10px;margin-top:10px}
+.betForm{background:#222;padding:13px;border-radius:12px;margin-top:12px}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .quick button{background:#333}
 .close{background:#555}
 .small{color:#bbb;font-size:13px}
 .goal{color:#ffdf00;font-weight:bold}
 .odds{color:#00ff9d;font-weight:bold}
+.user{font-size:13px;color:#00ff9d;text-align:center}
 </style>
 </head>
 
 <body>
 <div class="box">
 <h2>🎫 STG7 SINGLE BET</h2>
-
-<div id="matchList">
-<p class="small">Loading matches...</p>
-</div>
+<div class="user" id="userBox">Checking login...</div>
+<div id="matchList"><p class="small">Loading matches...</p></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  onSnapshot,
-  addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -63,14 +51,16 @@ const auth = getAuth(app);
 
 let currentUser = null;
 const matchList = document.getElementById("matchList");
+const userBox = document.getElementById("userBox");
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    alert("ကျေးဇူးပြု၍ Login အရင်ဝင်ပါ");
+    alert("Login အရင်ဝင်ပါ");
     location.href = "login.html";
     return;
   }
   currentUser = user;
+  userBox.innerText = "Login: " + user.email;
 });
 
 window.openBet = function(id){
