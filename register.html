@@ -1,1 +1,73 @@
-<h1>REGISTER</h1>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STG7 Register</title>
+<style>
+body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:15px}
+.box{max-width:420px;margin:auto;padding-top:60px}
+h2{text-align:center}
+input,button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
+button{background:#00a000;color:white;font-weight:bold}
+a{color:#00ff9d}
+.small{text-align:center;color:#bbb}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>📝 STG7 REGISTER</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button id="registerBtn">REGISTER</button>
+
+<p class="small">
+Already have account? <a href="login.html">Login</a>
+</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
+  authDomain: "stg7-bet-v2.firebaseapp.com",
+  projectId: "stg7-bet-v2",
+  storageBucket: "stg7-bet-v2.firebasestorage.app",
+  messagingSenderId: "1042658872289",
+  appId: "1:1042658872289:web:f70c7cb766367f7fe9a0a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+document.getElementById("registerBtn").onclick = async ()=>{
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email,password);
+
+    await setDoc(doc(db,"users",userCred.user.uid),{
+      email: email,
+      balance: 0,
+      role: "user",
+      createdAt: serverTimestamp()
+    });
+
+    alert("Register Success");
+    location.href = "login.html";
+
+  }catch(e){
+    alert("Register Error: " + e.message);
+  }
+};
+</script>
+
+</body>
+</html>
