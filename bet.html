@@ -28,33 +28,18 @@ button{background:#00a000;color:white;font-weight:bold}
 <body>
 <div class="box">
 <h2>🎫 STG7 SINGLE BET</h2>
-
 <div class="user" id="userBox">Checking login...</div>
 <div class="balance" id="balanceBox">Balance: Loading...</div>
-
-<div id="matchList">
-<p class="small">Loading matches...</p>
-</div>
+<div id="matchList"><p class="small">Loading matches...</p></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  serverTimestamp
+  getFirestore, collection, doc, getDoc, onSnapshot,
+  addDoc, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -66,8 +51,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 let currentUser = null;
 let currentBalance = 0;
@@ -91,7 +76,6 @@ onAuthStateChanged(auth, (user) => {
   userBox.innerText = "Login: " + user.email;
 
   const userRef = doc(db, "users", user.uid);
-
   onSnapshot(userRef, (snap) => {
     if (snap.exists()) {
       currentBalance = Number(snap.data().balance || 0);
@@ -132,22 +116,22 @@ window.saveBet = async function(id){
     return;
   }
 
+  const userRef = doc(db, "users", currentUser.uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    alert("User wallet မတွေ့ပါ");
+    return;
+  }
+
+  const balance = Number(userSnap.data().balance || 0);
+
+  if (balance < stake) {
+    alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
+    return;
+  }
+
   try{
-    const userRef = doc(db, "users", currentUser.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      alert("User wallet မတွေ့ပါ");
-      return;
-    }
-
-    const balance = Number(userSnap.data().balance || 0);
-
-    if (balance < stake) {
-      alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
-      return;
-    }
-
     await addDoc(collection(db,"bets"),{
       userId: currentUser.uid,
       userEmail: currentUser.email,
@@ -164,6 +148,7 @@ window.saveBet = async function(id){
       odds: m.odds || m.body || "",
       stake: stake,
       status: "Pending",
+      winAmount: 0,
       createdAt: serverTimestamp()
     });
 
@@ -235,6 +220,5 @@ onSnapshot(collection(db,"matches"),(snapshot)=>{
   matchList.innerHTML = html;
 });
 </script>
-
 </body>
 </html>
