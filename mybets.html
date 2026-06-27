@@ -40,7 +40,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
@@ -61,6 +60,29 @@ const list = document.getElementById("list");
 const userBox = document.getElementById("userBox");
 const money = n => Number(n || 0).toLocaleString() + " Ks";
 
+function statusColor(status){
+  if(status === "Won") return "lime";
+  if(status === "Lost") return "red";
+  return "yellow";
+}
+
+function renderBet(b){
+  return `
+    <div class="card">
+      <div class="match">⚽ ${b.match || "-"}</div>
+      <div class="info">👤 ${b.userEmail || "-"}</div>
+      <div class="info">🏆 League : ${b.league || "-"}</div>
+      <div class="info">📅 ${b.date || "-"} ⏰ ${b.time || "-"}</div>
+      <div class="info">🎯 Bet : ${b.betType || "-"}</div>
+      <div class="info">🥅 Goal : ${b.goal || "-"}</div>
+      <div class="info">💰 Odds : ${b.odds || "-"}</div>
+      <div class="info">💵 Stake : ${money(b.stake)}</div>
+      <div class="info">🏅 Win : ${money(b.winAmount)}</div>
+      <div class="status" style="color:${statusColor(b.status)}">${b.status || "Pending"}</div>
+    </div>
+  `;
+}
+
 onAuthStateChanged(auth, user=>{
   if(!user){
     location.href = "login.html";
@@ -71,35 +93,29 @@ onAuthStateChanged(auth, user=>{
 
   const q = query(
     collection(db,"bets"),
-    where("userId","==",user.uid),
-    orderBy("createdAt","desc")
+    where("userId","==",user.uid)
   );
 
   onSnapshot(q, snap=>{
-    let html = "";
+    let bets = [];
 
     snap.forEach(d=>{
-      const b = d.data();
-
-      let color = "yellow";
-      if(b.status === "Won") color = "lime";
-      if(b.status === "Lost") color = "red";
-
-      html += `
-      <div class="card">
-        <div class="match">⚽ ${b.match || "-"}</div>
-        <div class="info">🏆 League : ${b.league || "-"}</div>
-        <div class="info">📅 ${b.date || "-"} ⏰ ${b.time || "-"}</div>
-        <div class="info">🎯 Bet : ${b.betType || "-"}</div>
-        <div class="info">🥅 Goal : ${b.goal || "-"}</div>
-        <div class="info">💰 Odds : ${b.odds || "-"}</div>
-        <div class="info">💵 Stake : ${money(b.stake)}</div>
-        <div class="info">🏅 Win : ${money(b.winAmount)}</div>
-        <div class="status" style="color:${color}">${b.status || "Pending"}</div>
-      </div>`;
+      bets.push(d.data());
     });
 
-    list.innerHTML = html || "<p class='small'>Bet မရှိသေးပါ</p>";
+    bets.sort((a,b)=>{
+      const ta = a.createdAt?.seconds || 0;
+      const tb = b.createdAt?.seconds || 0;
+      return tb - ta;
+    });
+
+    if(bets.length === 0){
+      list.innerHTML = "<p class='small'>Bet မရှိသေးပါ</p>";
+      return;
+    }
+
+    list.innerHTML = bets.map(renderBet).join("");
+
   }, error=>{
     list.innerHTML = "<p class='small'>Error: " + error.message + "</p>";
   });
