@@ -93,45 +93,55 @@ window.setStatus = async (id,status)=>{
 
     const bet = betSnap.data();
 
-    if(bet.status === status){
-      alert("Status က အရင်ကတည်းက " + status + " ဖြစ်နေပါတယ်");
-      return;
-    }
-
-    if(bet.status === "Won"){
-      alert("ဒီ Bet က Won ပြီးသားပါ။ ထပ်ပြောင်းရင် Wallet မထပ်တွက်ပါ");
-      await updateDoc(betRef, { status: status });
+    if(bet.settledPaid === true){
+      alert("ဒီ Bet က Wallet တွက်ပြီးသားပါ။ ထပ်မပြောင်းပါနဲ့");
       return;
     }
 
     if(status === "Won"){
       if(!bet.userId){
-        alert("ဒီ Bet မှာ userId မရှိလို့ Wallet ထဲ ငွေမထည့်နိုင်ပါ");
-        await updateDoc(betRef, { status: status });
+        alert("userId မရှိလို့ Wallet မထည့်နိုင်ပါ");
         return;
       }
 
       const stake = Number(bet.stake || 0);
       const winAmount = stake * 2;
-
       const userRef = doc(db,"users",bet.userId);
 
-      await updateDoc(userRef, {
+      await updateDoc(userRef,{
         balance: increment(winAmount)
       });
 
-      await updateDoc(betRef, {
-        status: status,
+      await updateDoc(betRef,{
+        status:"Won",
         winAmount: winAmount,
+        settledPaid: true,
         settledAt: new Date()
       });
 
-      alert("Won Updated. Wallet +" + winAmount.toLocaleString() + " Ks");
+      alert("WON ✅ Wallet +" + winAmount.toLocaleString() + " Ks");
       return;
     }
 
-    await updateDoc(betRef, { status: status });
-    alert("Status updated: " + status);
+    if(status === "Lost"){
+      await updateDoc(betRef,{
+        status:"Lost",
+        winAmount:0,
+        settledPaid:true,
+        settledAt:new Date()
+      });
+
+      alert("LOST updated");
+      return;
+    }
+
+    await updateDoc(betRef,{
+      status:"Pending",
+      winAmount:0,
+      settledPaid:false
+    });
+
+    alert("Status updated: Pending");
 
   }catch(e){
     alert("Update Error: " + e.message);
