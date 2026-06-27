@@ -94,10 +94,9 @@ onAuthStateChanged(auth, user=>{
   });
 
   const q = query(
-    collection(db,"bets"),
-    where("userId","==",user.uid),
-    orderBy("createdAt","desc")
-  );
+  collection(db,"bets"),
+  where("userId","==",user.uid)
+);
 
   onSnapshot(q, snap=>{
     let totalBet = 0;
