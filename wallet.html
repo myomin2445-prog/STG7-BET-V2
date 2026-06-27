@@ -99,14 +99,24 @@ onAuthStateChanged(auth, user=>{
 );
 
   onSnapshot(q, snap=>{
-    let totalBet = 0;
-    let totalWon = 0;
-    let pending = 0;
-    let lost = 0;
-    let html = "";
+  let totalBet = 0;
+  let totalWon = 0;
+  let pending = 0;
+  let lost = 0;
+  let html = "";
+  let bets = [];
 
-    snap.forEach(d=>{
-      const b = d.data();
+  snap.forEach(d=>{
+    bets.push(d.data());
+  });
+
+  bets.sort((a,b)=>{
+    const ta = a.createdAt?.seconds || 0;
+    const tb = b.createdAt?.seconds || 0;
+    return tb - ta;
+  });
+
+  bets.forEach(b=>{
       const stake = Number(b.stake || 0);
       const win = Number(b.winAmount || 0);
 
