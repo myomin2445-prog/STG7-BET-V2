@@ -5,23 +5,25 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>STG7 Single Bet</title>
 <style>
-body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:15px}
-.box{max-width:520px;margin:auto}
+body{margin:0;background:#071107;color:white;font-family:Arial;padding:14px;padding-bottom:70px}
+.box{max-width:560px;margin:auto}
 h2{text-align:center}
-.card{background:#1b1b1b;padding:15px;border-radius:12px;margin:12px 0}
+.card{background:#101c10;padding:15px;border-radius:14px;margin:12px 0;border:1px solid #1f3d1f}
 .match{font-size:22px;font-weight:bold}
-.info{color:#bbb;margin:8px 0;font-size:17px}
+.info{color:#ccc;margin:7px 0;font-size:17px}
+.goal{color:#ffd700;font-weight:bold}
+.odds{color:#00ff66;font-weight:bold}
+.user{font-size:14px;color:#00ff9d;text-align:center}
+.balance{font-size:22px;color:#ffd700;text-align:center;font-weight:bold;margin:10px 0}
 input,select,button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:9px;box-sizing:border-box;font-size:16px}
 button{background:#00a000;color:white;font-weight:bold}
-.betForm{background:#222;padding:13px;border-radius:12px;margin-top:12px}
+.close{background:#555}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .quick button{background:#333}
-.close{background:#555}
+.betForm{background:#182818;padding:12px;border-radius:12px;margin-top:10px}
 .small{color:#bbb;font-size:13px}
-.goal{color:#ffdf00;font-weight:bold}
-.odds{color:#00ff9d;font-weight:bold}
-.user{font-size:14px;color:#00ff9d;text-align:center;margin-bottom:8px}
-.balance{font-size:18px;color:#ffdf00;text-align:center;font-weight:bold;margin-bottom:15px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#101c10;border-top:1px solid #1f3d1f;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px 0}
+.nav a{text-align:center;color:white;text-decoration:none;font-size:13px}
 </style>
 </head>
 
@@ -31,6 +33,13 @@ button{background:#00a000;color:white;font-weight:bold}
 <div class="user" id="userBox">Checking login...</div>
 <div class="balance" id="balanceBox">Balance: Loading...</div>
 <div id="matchList"><p class="small">Loading matches...</p></div>
+</div>
+
+<div class="nav">
+  <a href="index.html">🏠<br>Home</a>
+  <a href="bet.html">⚽<br>Bet</a>
+  <a href="mybets.html">🎫<br>My Bets</a>
+  <a href="wallet.html">💰<br>Wallet</a>
 </div>
 
 <script type="module">
@@ -55,19 +64,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
-let currentBalance = 0;
+let matchesData = [];
 
-const matchList = document.getElementById("matchList");
 const userBox = document.getElementById("userBox");
 const balanceBox = document.getElementById("balanceBox");
+const matchList = document.getElementById("matchList");
 
-function showBalance(amount){
-  balanceBox.innerText = "Balance: " + Number(amount || 0).toLocaleString() + " Ks";
-}
+const money = n => Number(n || 0).toLocaleString() + " Ks";
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    alert("Login အရင်ဝင်ပါ");
+onAuthStateChanged(auth, user=>{
+  if(!user){
     location.href = "login.html";
     return;
   }
@@ -75,149 +81,147 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
   userBox.innerText = "Login: " + user.email;
 
-  const userRef = doc(db, "users", user.uid);
-  onSnapshot(userRef, (snap) => {
-    if (snap.exists()) {
-      currentBalance = Number(snap.data().balance || 0);
-      showBalance(currentBalance);
-    } else {
-      currentBalance = 0;
-      showBalance(0);
+  onSnapshot(doc(db,"users",user.uid), snap=>{
+    if(snap.exists()){
+      balanceBox.innerText = "Balance: " + money(snap.data().balance);
+    }else{
+      balanceBox.innerText = "Balance: 0 Ks";
     }
   });
 });
 
-window.openBet = function(id){
-  document.querySelectorAll(".betForm").forEach(f => f.style.display = "none");
-  document.getElementById("form_" + id).style.display = "block";
+window.openBet = id=>{
+  document.querySelectorAll(".betForm").forEach(f=>f.style.display="none");
+  document.getElementById("form_"+id).style.display="block";
 };
 
-window.closeBet = function(id){
-  document.getElementById("form_" + id).style.display = "none";
+window.closeBet = id=>{
+  document.getElementById("form_"+id).style.display="none";
 };
 
-window.quickStake = function(id, amount){
-  document.getElementById("stake_" + id).value = amount;
+window.quickStake = (id,amount)=>{
+  document.getElementById("stake_"+id).value = amount;
 };
 
-window.saveBet = async function(id){
-  if (!currentUser) {
+window.saveBet = async id=>{
+  if(!currentUser){
     alert("Login အရင်ဝင်ပါ");
-    location.href = "login.html";
     return;
   }
 
-  const m = window.matchesData.find(x => x.id === id);
-  const betType = document.getElementById("betType_" + id).value;
-  const stake = Number(document.getElementById("stake_" + id).value || 0);
+  const m = matchesData.find(x=>x.id===id);
+  if(!m){
+    alert("Match မတွေ့ပါ");
+    return;
+  }
+
+  if(m.status === "Closed"){
+    alert("ဒီပွဲက ပိတ်ထားပြီးပါပြီ");
+    return;
+  }
+
+  const betType = document.getElementById("betType_"+id).value;
+  const stake = Number(document.getElementById("stake_"+id).value || 0);
 
   if(!stake || stake <= 0){
     alert("လောင်းငွေထည့်ပါ");
     return;
   }
 
-  const userRef = doc(db, "users", currentUser.uid);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    alert("User wallet မတွေ့ပါ");
-    return;
-  }
-
-  const balance = Number(userSnap.data().balance || 0);
-
-  if (balance < stake) {
-    alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
-    return;
-  }
-
   try{
+    const userRef = doc(db,"users",currentUser.uid);
+    const userSnap = await getDoc(userRef);
+
+    if(!userSnap.exists()){
+      alert("User wallet မတွေ့ပါ");
+      return;
+    }
+
+    const balance = Number(userSnap.data().balance || 0);
+
+    if(balance < stake){
+      alert("လက်ကျန်ငွေ မလုံလောက်ပါ");
+      return;
+    }
+
     await addDoc(collection(db,"bets"),{
       userId: currentUser.uid,
       userEmail: currentUser.email,
 
       matchId: id,
       match: (m.home || "") + " vs " + (m.away || ""),
-      league: m.league || m.body || "",
-      date: m.date || "",
-      time: m.time || m.kr || "",
+      league: m.league || "",
       home: m.home || "",
       away: m.away || "",
-      betType: betType,
+      date: m.date || "",
+      time: m.time || "",
       goal: m.goal || "",
-      odds: m.odds || m.body || "",
+      odds: m.odds || "",
+      betType: betType,
       stake: stake,
       status: "Pending",
       winAmount: 0,
       createdAt: serverTimestamp()
     });
 
-    await updateDoc(userRef, {
-      balance: balance - stake
-    });
+    await updateDoc(userRef,{ balance: balance - stake });
 
     alert("BET SAVED SUCCESS");
-    document.getElementById("stake_" + id).value = "";
+    document.getElementById("stake_"+id).value = "";
     closeBet(id);
 
-  }catch(error){
-    alert("ERROR: " + error.message);
+  }catch(e){
+    alert("ERROR: " + e.message);
   }
 };
 
-onSnapshot(collection(db,"matches"),(snapshot)=>{
-  window.matchesData = [];
+onSnapshot(collection(db,"matches"), snap=>{
+  matchesData = [];
   let html = "";
 
-  if(snapshot.empty){
-    matchList.innerHTML = "<p class='small'>No matches yet</p>";
-    return;
-  }
+  snap.forEach(d=>{
+    const m = {id:d.id,...d.data()};
+    if((m.status || "Open") !== "Open") return;
 
-  snapshot.forEach((docSnap)=>{
-    const m = { id: docSnap.id, ...docSnap.data() };
-    window.matchesData.push(m);
+    matchesData.push(m);
 
     html += `
-      <div class="card">
-        <div class="match">⚽ ${m.home || ""} vs ${m.away || ""}</div>
-        <div class="info">🏆 ${m.league || m.body || "League"}</div>
-        <div class="info">📅 ${m.date || ""} ⏰ ${m.time || m.kr || ""}</div>
-        <div class="info goal">ဂိုးလိုင်း: ${m.goal || "-"}</div>
-        <div class="info odds">ပေါက်ကြေး: ${m.odds || m.body || "-"}</div>
+    <div class="card">
+      <div class="match">⚽ ${m.home || "-"} vs ${m.away || "-"}</div>
+      <div class="info">🏆 ${m.league || "-"}</div>
+      <div class="info">📅 ${m.date || "-"} ⏰ ${m.time || "-"}</div>
+      <div class="info goal">🥅 Goal : ${m.goal || "-"}</div>
+      <div class="info odds">💰 Odds : ${m.odds || "-"}</div>
 
-        <button onclick="openBet('${docSnap.id}')">BET</button>
+      <button onclick="openBet('${d.id}')">BET</button>
 
-        <div class="betForm" id="form_${docSnap.id}" style="display:none">
-          <select id="betType_${docSnap.id}">
-            <option value="Over">Over</option>
-            <option value="Under">Under</option>
-            <option value="Home">Home</option>
-            <option value="Away">Away</option>
-            <option value="Draw">Draw</option>
-          </select>
+      <div class="betForm" id="form_${d.id}" style="display:none">
+        <select id="betType_${d.id}">
+          <option value="Over">Over</option>
+          <option value="Under">Under</option>
+          <option value="Home">Home</option>
+          <option value="Away">Away</option>
+          <option value="Draw">Draw</option>
+        </select>
 
-          <input id="stake_${docSnap.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
+        <input id="stake_${d.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
 
-          <div class="quick">
-            <button onclick="quickStake('${docSnap.id}',10000)">10,000</button>
-            <button onclick="quickStake('${docSnap.id}',20000)">20,000</button>
-            <button onclick="quickStake('${docSnap.id}',50000)">50,000</button>
-            <button onclick="quickStake('${docSnap.id}',100000)">100,000</button>
-            <button onclick="quickStake('${docSnap.id}',200000)">200,000</button>
-            <button onclick="quickStake('${docSnap.id}',500000)">500,000</button>
-            <button onclick="quickStake('${docSnap.id}',1000000)">1,000,000</button>
-            <button onclick="quickStake('${docSnap.id}',2000000)">2,000,000</button>
-          </div>
-
-          <button onclick="saveBet('${docSnap.id}')">CONFIRM BET</button>
-          <button class="close" onclick="closeBet('${docSnap.id}')">CANCEL</button>
+        <div class="quick">
+          <button onclick="quickStake('${d.id}',10000)">10,000</button>
+          <button onclick="quickStake('${d.id}',20000)">20,000</button>
+          <button onclick="quickStake('${d.id}',50000)">50,000</button>
+          <button onclick="quickStake('${d.id}',100000)">100,000</button>
+          <button onclick="quickStake('${d.id}',200000)">200,000</button>
+          <button onclick="quickStake('${d.id}',500000)">500,000</button>
         </div>
+
+        <button onclick="saveBet('${d.id}')">CONFIRM BET</button>
+        <button class="close" onclick="closeBet('${d.id}')">CANCEL</button>
       </div>
-    `;
+    </div>`;
   });
 
-  matchList.innerHTML = html;
+  matchList.innerHTML = html || "<p class='small'>Open matches မရှိသေးပါ</p>";
 });
 </script>
 </body>
