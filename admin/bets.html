@@ -93,10 +93,10 @@ window.setStatus = async (id,status)=>{
 
     const bet = betSnap.data();
 
-    if(bet.settledPaid === true){
-      alert("ဒီ Bet က Wallet တွက်ပြီးသားပါ။ ထပ်မပြောင်းပါနဲ့");
-      return;
-    }
+    if (status === "Won" && bet.status === "Won") {
+    alert("ဒီ Bet က Won ဖြစ်ပြီး Wallet တွက်ပြီးသားပါ");
+    return;
+}
 
     if(status === "Won"){
       if(!bet.userId){
