@@ -58,7 +58,7 @@ const db = getFirestore(app);
 
 const list = document.getElementById("list");
 const userBox = document.getElementById("userBox");
-const money = n => Number(n || 0).toLocaleString() + " Ks";
+const money = n => "₩" + Number(n || 0).toLocaleString();
 
 function statusColor(status){
   if(status === "Won") return "lime";
