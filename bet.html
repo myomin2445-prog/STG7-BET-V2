@@ -3,39 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STG7 Single
-</head>
+<title>STG7 Single Bet</title>
+
 <style>
-body{margin:0;background:#050505;color:white;font-family:Arial;padding:10px 8px 70px}
+body{margin:0;background:#050505;color:white;font-family:Arial;padding:10px 8px 75px}
 .box{max-width:620px;margin:auto}
-h2{text-align:center;color:#ffd700;margin:10px 0}
-.user{text-align:center;color:#00ff66;font-size:13px}
-.balance{text-align:center;color:#ffd700;font-size:20px;font-weight:bold;margin:8px 0 12px}
-.league{background:#0b7a24;color:#fff;padding:9px 10px;border-radius:6px 6px 0 0;font-weight:bold}
+.top{background:#0b7a24;padding:12px;border-radius:10px;margin-bottom:10px}
+.title{text-align:center;font-size:22px;font-weight:bold;color:#ffd700}
+.user{text-align:center;color:#d7ffd7;font-size:13px;margin-top:5px}
+.balance{text-align:center;color:#ffd700;font-size:22px;font-weight:bold;margin-top:6px}
+
+.league{background:#0b7a24;color:#fff;padding:9px 10px;border-radius:7px 7px 0 0;font-weight:bold;margin-top:10px}
 .matchRow{background:#151515;border-bottom:1px solid #333;padding:10px}
 .time{color:#bbb;font-size:12px;margin-bottom:8px}
-.teams{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;text-align:center;font-size:16px}
-.mid{color:#ffd700;font-weight:bold}
-.market{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;text-align:center;margin-top:8px;color:#ccc}
-.oddsText{color:#00ff66;font-weight:bold}
-.betBtn{background:#00a000;color:white;border:0;border-radius:6px;padding:9px;font-weight:bold;margin-top:8px;width:100%}
-input,select,button{box-sizing:border-box;font-size:16px}
-.betForm{background:#202020;padding:10px;border-radius:8px;margin-top:8px}
-.betForm select,.betForm input{width:100%;padding:12px;margin:6px 0;border:0;border-radius:7px}
-.quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.quick button{background:#333;color:white;border:0;border-radius:7px;padding:10px}
-.confirm{background:#00a000!important;color:white!important;width:100%;padding:12px;border:0;border-radius:7px;margin-top:6px}
-.close{background:#555!important;color:white!important;width:100%;padding:12px;border:0;border-radius:7px;margin-top:6px}
-.small{color:#bbb;font-size:13px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#101c10;border-top:1px solid #1f3d1f;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px 0}
+.teams{display:grid;grid-template-columns:1fr 80px 1fr;align-items:center;text-align:center;font-size:16px;font-weight:bold}
+.mid{color:#ffd700}
+.market{display:grid;grid-template-columns:1fr 80px 1fr;gap:6px;margin-top:10px;text-align:center}
+.market button{background:#242424;color:white;border:1px solid #444;border-radius:7px;padding:9px;font-weight:bold}
+.market .odds{color:#00ff66;background:#111;border:1px solid #0b7a24}
+.betBtn{background:#00a000;color:white;border:0;border-radius:7px;padding:10px;font-weight:bold;margin-top:8px;width:100%}
+.small{color:#bbb;font-size:13px;text-align:center}
+
+.sheetBg{display:none;position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,.65);z-index:10}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#151515;border-radius:18px 18px 0 0;padding:15px;z-index:11;display:none;border-top:2px solid #0b7a24}
+.sheet h3{text-align:center;margin:5px 0 12px;color:#ffd700}
+.sheetInfo{background:#202020;padding:10px;border-radius:10px;margin-bottom:10px;text-align:center}
+input,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
+.quick{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.quick button{background:#333;color:white;border:0;border-radius:7px;padding:11px;font-weight:bold}
+.confirm{background:#00a000;color:white;width:100%;padding:13px;border:0;border-radius:8px;margin-top:8px;font-weight:bold;font-size:16px}
+.cancel{background:#555;color:white;width:100%;padding:13px;border:0;border-radius:8px;margin-top:7px;font-weight:bold;font-size:16px}
+.potential{text-align:center;color:#00ff66;font-weight:bold;margin:8px 0}
+
+.nav{position:fixed;bottom:0;left:0;right:0;background:#101c10;border-top:1px solid #1f3d1f;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px 0;z-index:20}
 .nav a{text-align:center;color:white;text-decoration:none;font-size:13px}
 </style>
+</head>
+
 <body>
+
 <div class="box">
-<h2>🎫 STG7 SINGLE BET</h2>
-<div class="user" id="userBox">Checking login...</div>
-<div class="balance" id="balanceBox">Balance: Loading...</div>
-<div id="matchList"><p class="small">Loading matches...</p></div>
+  <div class="top">
+    <div class="title">⚽ STG7 SPORTS</div>
+    <div class="user" id="userBox">Checking login...</div>
+    <div class="balance" id="balanceBox">Balance: Loading...</div>
+  </div>
+
+  <div id="matchList">
+    <p class="small">Loading matches...</p>
+  </div>
+</div>
+
+<div class="sheetBg" id="sheetBg" onclick="closeBetSheet()"></div>
+
+<div class="sheet" id="betSheet">
+  <h3>🎫 BET SLIP</h3>
+
+  <div class="sheetInfo">
+    <div id="sheetMatch">Match</div>
+    <div id="sheetLeague" class="small">League</div>
+  </div>
+
+  <select id="sheetBetType" onchange="updatePotential()">
+    <option value="Home">Home</option>
+    <option value="Away">Away</option>
+    <option value="Over">Over</option>
+    <option value="Under">Under</option>
+    <option value="Draw">Draw</option>
+  </select>
+
+  <input id="sheetStake" type="number" placeholder="လောင်းငွေ ဥပမာ 50000" oninput="updatePotential()">
+
+  <div class="quick">
+    <button onclick="quickStake(10000)">10K</button>
+    <button onclick="quickStake(20000)">20K</button>
+    <button onclick="quickStake(50000)">50K</button>
+    <button onclick="quickStake(100000)">100K</button>
+    <button onclick="quickStake(200000)">200K</button>
+    <button onclick="quickStake(500000)">500K</button>
+  </div>
+
+  <div class="potential" id="potentialWin">Potential Win: ₩0</div>
+
+  <button class="confirm" onclick="saveBet()">CONFIRM BET</button>
+  <button class="cancel" onclick="closeBetSheet()">CANCEL</button>
 </div>
 
 <div class="nav">
@@ -49,8 +100,14 @@ input,select,button{box-sizing:border-box;font-size:16px}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
-  getFirestore, collection, doc, getDoc, onSnapshot,
-  addDoc, updateDoc, serverTimestamp
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -68,12 +125,13 @@ const db = getFirestore(app);
 
 let currentUser = null;
 let matchesData = [];
+let selectedMatchId = null;
 
 const userBox = document.getElementById("userBox");
 const balanceBox = document.getElementById("balanceBox");
 const matchList = document.getElementById("matchList");
 
-const money = n => Number(n || 0).toLocaleString() + " Ks";
+const money = n => "₩" + Number(n || 0).toLocaleString();
 
 onAuthStateChanged(auth, user=>{
   if(!user){
@@ -82,49 +140,71 @@ onAuthStateChanged(auth, user=>{
   }
 
   currentUser = user;
-  userBox.innerText = "Login: " + user.email;
+  userBox.innerText = "👤 " + user.email;
 
   onSnapshot(doc(db,"users",user.uid), snap=>{
     if(snap.exists()){
       balanceBox.innerText = "Balance: " + money(snap.data().balance);
     }else{
-      balanceBox.innerText = "Balance: 0 Ks";
+      balanceBox.innerText = "Balance: ₩0";
     }
   });
 });
 
-window.openBet = id=>{
-  document.querySelectorAll(".betForm").forEach(f=>f.style.display="none");
-  document.getElementById("form_"+id).style.display="block";
-};
-
-window.closeBet = id=>{
-  document.getElementById("form_"+id).style.display="none";
-};
-
-window.quickStake = (id,amount)=>{
-  document.getElementById("stake_"+id).value = amount;
-};
-
-window.saveBet = async id=>{
-  if(!currentUser){
-    alert("Login အရင်ဝင်ပါ");
-    return;
-  }
-
+window.openBetSheet = function(id,type){
   const m = matchesData.find(x=>x.id===id);
   if(!m){
     alert("Match မတွေ့ပါ");
     return;
   }
 
-  if(m.status === "Closed"){
+  selectedMatchId = id;
+
+  document.getElementById("sheetMatch").innerText = (m.home || "-") + " vs " + (m.away || "-");
+  document.getElementById("sheetLeague").innerText = m.league || "-";
+  document.getElementById("sheetBetType").value = type || "Home";
+  document.getElementById("sheetStake").value = "";
+
+  updatePotential();
+
+  document.getElementById("sheetBg").style.display = "block";
+  document.getElementById("betSheet").style.display = "block";
+};
+
+window.closeBetSheet = function(){
+  document.getElementById("sheetBg").style.display = "none";
+  document.getElementById("betSheet").style.display = "none";
+};
+
+window.quickStake = function(amount){
+  document.getElementById("sheetStake").value = amount;
+  updatePotential();
+};
+
+window.updatePotential = function(){
+  const stake = Number(document.getElementById("sheetStake").value || 0);
+  document.getElementById("potentialWin").innerText = "Potential Win: " + money(stake * 2);
+};
+
+window.saveBet = async function(){
+  if(!currentUser){
+    alert("Login အရင်ဝင်ပါ");
+    return;
+  }
+
+  const m = matchesData.find(x=>x.id===selectedMatchId);
+  if(!m){
+    alert("Match မတွေ့ပါ");
+    return;
+  }
+
+  if((m.status || "Open") !== "Open"){
     alert("ဒီပွဲက ပိတ်ထားပြီးပါပြီ");
     return;
   }
 
-  const betType = document.getElementById("betType_"+id).value;
-  const stake = Number(document.getElementById("stake_"+id).value || 0);
+  const betType = document.getElementById("sheetBetType").value;
+  const stake = Number(document.getElementById("sheetStake").value || 0);
 
   if(!stake || stake <= 0){
     alert("လောင်းငွေထည့်ပါ");
@@ -151,7 +231,7 @@ window.saveBet = async id=>{
       userId: currentUser.uid,
       userEmail: currentUser.email,
 
-      matchId: id,
+      matchId: selectedMatchId,
       match: (m.home || "") + " vs " + (m.away || ""),
       league: m.league || "",
       home: m.home || "",
@@ -170,8 +250,7 @@ window.saveBet = async id=>{
     await updateDoc(userRef,{ balance: balance - stake });
 
     alert("BET SAVED SUCCESS");
-    document.getElementById("stake_"+id).value = "";
-    closeBet(id);
+    closeBetSheet();
 
   }catch(e){
     alert("ERROR: " + e.message);
@@ -182,59 +261,49 @@ onSnapshot(collection(db,"matches"), snap=>{
   matchesData = [];
   let html = "";
 
+  if(snap.empty){
+    matchList.innerHTML = "<p class='small'>Open matches မရှိသေးပါ</p>";
+    return;
+  }
+
   snap.forEach(d=>{
     const m = {id:d.id,...d.data()};
     if((m.status || "Open") !== "Open") return;
 
     matchesData.push(m);
- html += `
-<div class="league">🏆 ${m.league || "-"}</div>
 
-<div class="matchRow">
-  <div class="time">🕒 ${m.date || "-"} ${m.time || "-"}</div>
+    html += `
+      <div class="league">🏆 ${m.league || "-"}</div>
 
-  <div class="teams">
-    <div>${m.home || "-"}</div>
-    <div class="mid">${m.goal || "-"}</div>
-    <div>${m.away || "-"}</div>
-  </div>
+      <div class="matchRow">
+        <div class="time">🕒 ${m.date || "-"} ${m.time || "-"}</div>
 
-  <div class="market">
-    <div>Over</div>
-    <div class="oddsText">${m.odds || "-"}</div>
-    <div>Under</div>
-  </div>
+        <div class="teams">
+          <div>${m.home || "-"}</div>
+          <div class="mid">${m.goal || "-"}</div>
+          <div>${m.away || "-"}</div>
+        </div>
 
-  <button class="betBtn" onclick="openBet('${d.id}')">BET</button>
+        <div class="market">
+          <button onclick="openBetSheet('${d.id}','Home')">Home</button>
+          <button class="odds" onclick="openBetSheet('${d.id}','Draw')">${m.odds || "-"}</button>
+          <button onclick="openBetSheet('${d.id}','Away')">Away</button>
+        </div>
 
-  <div class="betForm" id="form_${d.id}" style="display:none">
-    <select id="betType_${d.id}">
-      <option value="Over">Over</option>
-      <option value="Under">Under</option>
-      <option value="Home">Home</option>
-      <option value="Away">Away</option>
-      <option value="Draw">Draw</option>
-    </select>
+        <div class="market">
+          <button onclick="openBetSheet('${d.id}','Over')">Over</button>
+          <button class="odds">${m.goal || "-"}</button>
+          <button onclick="openBetSheet('${d.id}','Under')">Under</button>
+        </div>
 
-    <input id="stake_${d.id}" type="number" placeholder="လောင်းငွေ ဥပမာ 50000">
-
-    <div class="quick">
-      <button onclick="quickStake('${d.id}',10000)">10,000</button>
-      <button onclick="quickStake('${d.id}',20000)">20,000</button>
-      <button onclick="quickStake('${d.id}',50000)">50,000</button>
-      <button onclick="quickStake('${d.id}',100000)">100,000</button>
-      <button onclick="quickStake('${d.id}',200000)">200,000</button>
-      <button onclick="quickStake('${d.id}',500000)">500,000</button>
-    </div>
-
-    <button class="confirm" onclick="saveBet('${d.id}')">CONFIRM BET</button>
-    <button class="close" onclick="closeBet('${d.id}')">CANCEL</button>
-  </div>
-</div>`;
+        <button class="betBtn" onclick="openBetSheet('${d.id}','Home')">BET</button>
+      </div>
+    `;
   });
 
   matchList.innerHTML = html || "<p class='small'>Open matches မရှိသေးပါ</p>";
 });
 </script>
+
 </body>
 </html>
