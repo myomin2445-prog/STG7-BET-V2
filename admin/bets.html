@@ -173,8 +173,8 @@ function render(){
       <p>🎯 Bet : ${b.betType || "-"}</p>
       <p>🥅 Goal : ${b.goal || "-"}</p>
       <p>💰 Odds : ${b.odds || "-"}</p>
-      <p>💵 Stake : ${Number(b.stake || 0).toLocaleString()} Ks</p>
-      <p>🏅 Win Amount : ${Number(b.winAmount || 0).toLocaleString()} Ks</p>
+      <p>💵 Stake : ₩${Number(b.stake || 0).toLocaleString()}</p>
+      <p>🏅 Win Amount : ₩${Number(b.winAmount || 0).toLocaleString()}</p>
       <p class="small">Status: <b style="color:${color}">${b.status || "Pending"}</b></p>
 
       <button class="pending" onclick="setStatus('${b.id}','Pending')">PENDING</button>
