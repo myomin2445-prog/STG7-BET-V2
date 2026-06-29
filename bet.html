@@ -288,9 +288,17 @@ onSnapshot(collection(db,"matches"), snap=>{
 </div>
 
         <div class="market">
-          <button onclick="openBetSheet('${d.id}','Home')">Home</button>
-          <button class="odds" onclick="openBetSheet('${d.id}','Draw')">${m.odds || "-"}</button>
-          <button onclick="openBetSheet('${d.id}','Away')">Away</button>
+          <button onclick="openBetSheet('${d.id}','Home')" style="color:red">
+${m.home || "-"}
+</button>
+
+<button class="odds" onclick="openBetSheet('${d.id}','Draw')">
+${m.odds || "-"}
+</button>
+
+<button onclick="openBetSheet('${d.id}','Away')">
+${m.away || "-"}
+</button>
         </div>
 
         <div class="market">
