@@ -197,7 +197,33 @@ window.quickStake = function(amount){
 
 window.updatePotential = function(){
   const stake = Number(document.getElementById("sheetStake").value || 0);
-  document.getElementById("potentialWin").innerText = "Potential Win: " + money(stake * 2);
+  const betType = document.getElementById("sheetBetType").value;
+
+  const m = matchesData.find(x => x.id === selectedMatchId);
+  if(!m){
+    document.getElementById("potentialWin").innerText = "Potential Win: " + money(0);
+    return;
+  }
+
+  let oddText = "";
+
+  if(betType === "Over" || betType === "Under"){
+    oddText = m.goal || "";
+  }else{
+    oddText = m.odds || "";
+  }
+
+  const found = oddText.match(/[+-]\d+/);
+  let percent = 100;
+
+  if(found){
+    percent = Number(found[0]);
+  }
+
+  const winAmount = stake + (stake * percent / 100);
+
+  document.getElementById("potentialWin").innerText =
+    "Potential Win: " + money(winAmount);
 };
 
 window.saveBet = async function(){
