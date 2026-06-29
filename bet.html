@@ -222,10 +222,14 @@ const isPlus = oddText.includes("+");
     percent = Number(found[0]);
   }
 
-  let winAmount = stake + (stake * percent / 100);
+  let winAmount = 0;
 
-if(betType === "Over" || betType === "Under"){
+if(isPlus){
     winAmount = stake + (stake * percent / 100);
+}else if(isMinus){
+    winAmount = stake - (stake * percent / 100);
+}else{
+    winAmount = stake;
 }
 
   document.getElementById("potentialWin").innerText =
