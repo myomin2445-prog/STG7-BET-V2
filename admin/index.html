@@ -193,6 +193,21 @@ window.deleteMatch = async function(id){
   }
 };
   async function settleMatch(matchId){
+    const betQuery = query(
+    collection(db, "bets"),
+    where("matchId", "==", matchId),
+    where("status", "==", "Pending")
+);
+
+const betSnap = await getDocs(betQuery);
+
+console.log("Pending Bets:", betSnap.size);
+
+for (const betDoc of betSnap.docs) {
+    const bet = betDoc.data();
+
+    console.log(bet);
+}
 
 }
 
