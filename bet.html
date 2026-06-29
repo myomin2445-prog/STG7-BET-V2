@@ -289,7 +289,7 @@ goalOdd: m.goal || "",
       winAmount: 0,
       createdAt: serverTimestamp()
     });
-
+updatePotential();
     await updateDoc(userRef,{ balance: balance - stake });
 
     alert("BET SAVED SUCCESS");
