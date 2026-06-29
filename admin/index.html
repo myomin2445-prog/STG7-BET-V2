@@ -161,6 +161,7 @@ ids("updateBtn").onclick = async ()=>{
 
   try{
     await updateDoc(doc(db,"matches",editId), getData());
+    await settleMatch(editId);
     clearForm();
     alert("MATCH UPDATED");
   }catch(e){
