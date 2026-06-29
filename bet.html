@@ -220,7 +220,11 @@ window.updatePotential = function(){
     percent = Number(found[0]);
   }
 
-  const winAmount = stake + (stake * percent / 100);
+  let winAmount = stake + (stake * percent / 100);
+
+if(betType === "Over" || betType === "Under"){
+    winAmount = stake + (stake * percent / 100);
+}
 
   document.getElementById("potentialWin").innerText =
     "Potential Win: " + money(winAmount);
