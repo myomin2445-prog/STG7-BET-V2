@@ -218,8 +218,33 @@ console.log("Pending Bets:", betSnap.size);
     const [homeScore, awayScore] = result.split("-").map(Number);
 
     console.log(homeScore, awayScore);
+      let status = "Lost";
 
+if (bet.betType === "Home" && homeScore > awayScore) {
+  status = "Won";
 }
+
+if (bet.betType === "Away" && awayScore > homeScore) {
+  status = "Won";
+}
+
+if (bet.betType === "Draw" && homeScore === awayScore) {
+  status = "Won";
+}
+
+const totalGoal = homeScore + awayScore;
+
+if (bet.betType === "Over") {
+  const line = Number((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+  if (totalGoal > line) status = "Won";
+}
+
+if (bet.betType === "Under") {
+  const line = Number((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+  if (totalGoal < line) status = "Won";
+}
+
+console.log("Bet Result:", bet.betType, status);
 }
 
 }
