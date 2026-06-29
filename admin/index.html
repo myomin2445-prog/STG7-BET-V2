@@ -202,11 +202,24 @@ window.deleteMatch = async function(id){
 const betSnap = await getDocs(betQuery);
 
 console.log("Pending Bets:", betSnap.size);
+    for (const betDoc of betSnap.docs) {
 
-for (const betDoc of betSnap.docs) {
     const bet = betDoc.data();
 
-    console.log(bet);
+    const matchRef = doc(db, "matches", bet.matchId);
+    const matchSnap = await getDoc(matchRef);
+
+    if (!matchSnap.exists()) continue;
+
+    const match = matchSnap.data();
+
+    const result = match.result || "";
+
+    const [homeScore, awayScore] = result.split("-").map(Number);
+
+    console.log(homeScore, awayScore);
+
+}
 }
 
 }
