@@ -61,12 +61,15 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 import {
   getFirestore,
   collection,
-  addDoc,
-  onSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp
+addDoc,
+onSnapshot,
+doc,
+updateDoc,
+deleteDoc,
+getDocs,
+query,
+where,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
