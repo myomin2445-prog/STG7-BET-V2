@@ -72,7 +72,31 @@ input,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box
     <option value="Draw">Draw</option>
   </select>
 
-  <input id="sheetStake" type="number" placeholder="လောင်းငွေ ဥပမာ 50000" oninput="updatePotential()">
+  <div class="stakeWrap">
+
+<input
+id="sheetStake"
+type="number"
+value="50000"
+oninput="updatePotential()">
+
+<div class="stakeBtns">
+
+<button type="button" onclick="changeStake(-100000)">-100K</button>
+
+<button type="button" onclick="changeStake(-50000)">-50K</button>
+
+<button type="button" onclick="changeStake(-10000)">-10K</button>
+
+<button type="button" onclick="changeStake(10000)">+10K</button>
+
+<button type="button" onclick="changeStake(50000)">+50K</button>
+
+<button type="button" onclick="changeStake(100000)">+100K</button>
+
+</div>
+
+</div>
 
   <div class="quick">
     <button onclick="quickStake(10000)">10K</button>
