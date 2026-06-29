@@ -214,6 +214,8 @@ window.updatePotential = function(){
   }
 
   const found = oddText.match(/[+-]\d+/);
+  const isMinus = oddText.includes("-");
+const isPlus = oddText.includes("+");
   let percent = 100;
 
   if(found){
