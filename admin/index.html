@@ -245,6 +245,41 @@ if (bet.betType === "Under") {
 }
 
 console.log("Bet Result:", bet.betType, status);
+  const stake = Number(bet.stake || 0);
+let winAmount = 0;
+
+if (status === "Won") {
+  const oddText =
+    (bet.betType === "Over" || bet.betType === "Under")
+      ? (bet.goalOdd || bet.goal || "")
+      : (bet.matchOdd || bet.odds || "");
+
+  const found = oddText.match(/[+-]\d+/);
+  let percent = 100;
+
+  if (found) {
+    percent = Number(found[0]);
+  }
+
+  if (oddText.includes("+")) {
+    winAmount = stake + (stake * percent / 100);
+  } else if (oddText.includes("-")) {
+    winAmount = stake - (stake * Math.abs(percent) / 100);
+  } else {
+    winAmount = stake * 2;
+  }
+
+  await updateDoc(doc(db, "users", bet.userId), {
+    balance: increment(winAmount)
+  });
+}
+
+await updateDoc(doc(db, "bets", betDoc.id), {
+  status: status,
+  winAmount: winAmount,
+  settledPaid: true,
+  settledAt: new Date()
+});    
  const stake = Number(bet.stake || 0);
 let winAmount = 0;
 
