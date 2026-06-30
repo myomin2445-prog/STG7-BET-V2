@@ -3,75 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STG7 Match Admin</title>
+<title>STG7 Admin Match</title>
+
 <style>
-body{margin:0;background:#0b0b0b;color:white;font-family:Arial;padding:14px}
-.box{max-width:620px;margin:auto}
-h2{text-align:center}
-input,select,button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box-sizing:border-box;font-size:16px}
-button{color:white;font-weight:bold}
-.login{background:#0066ff}.logout{background:#444}.save{background:#00a000}.update{background:#ff9800}.edit{background:#555}.del{background:#d40000}
-.card{background:#1d1d1d;padding:15px;border-radius:12px;margin:12px 0}
+body{
+  margin:0;
+  background:#050505;
+  color:white;
+  font-family:Arial;
+  padding:14px;
+  padding-bottom:70px;
+}
+
+.box{
+  max-width:720px;
+  margin:auto;
+}
+
+h2{
+  text-align:center;
+  color:#ffd700;
+}
+
+input,select,button{
+  width:100%;
+  padding:13px;
+  margin:7px 0;
+  border:0;
+  border-radius:9px;
+  box-sizing:border-box;
+  font-size:16px;
+}
+
+input,select{
+  background:#111;
+  color:white;
+  border:1px solid #333;
+}
+
+button{
+  color:white;
+  font-weight:bold;
+}
+
+.login{background:#0066ff}
+.logout{background:#444}
+.save{background:#00a000}
+.update{background:#ff9800}
+.edit{background:#555}
+.del{background:#d40000}
+
+.card{
+  background:#141414;
+  padding:15px;
+  border-radius:14px;
+  margin:12px 0;
+  border:1px solid #3a3200;
+}
+
 .hidden{display:none}
-.small{color:#bbb;font-size:13px}
-.open{color:#00ff66}.closed{color:#ff4444}
+
+.small{
+  color:#bbb;
+  font-size:13px;
+}
+
+.title{
+  background:#111;
+  border:1px solid #ffd700;
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+  color:#ffd700;
+  font-size:24px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.formBox{
+  background:#111;
+  border:1px solid #333;
+  border-radius:14px;
+  padding:12px;
+  margin:12px 0;
+}
+
+.matchName{
+  font-size:20px;
+  font-weight:bold;
+  color:#fff;
+  text-align:center;
+}
+
+.gold{color:#ffd700}
+.green{color:#00ff66}
+.red{color:#ff4444}
+.yellow{color:#ffdf00}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.statusOpen{color:#00ff66}
+.statusClosed{color:#ffdf00}
+.statusFinished{color:#ff4444}
 </style>
 </head>
 
 <body>
+
 <div class="box">
 
 <div id="loginBox">
-<h2>🔐 MATCH ADMIN LOGIN</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button class="login" id="loginBtn">LOGIN</button>
+  <div class="title">🔐 STG7 ADMIN LOGIN</div>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button class="login" id="loginBtn">LOGIN</button>
 </div>
 
 <div id="adminBox" class="hidden">
-<h2>⚽ MATCH MANAGER</h2>
-<button class="logout" id="logoutBtn">LOGOUT</button>
+  <div class="title">⚽ STG7 MATCH MANAGER</div>
+  <button class="logout" id="logoutBtn">LOGOUT</button>
 
-<input id="league" placeholder="League">
-<input id="home" placeholder="Home Team">
-<input id="away" placeholder="Away Team">
-<input id="date" placeholder="Date 27/06/2026">
-<input id="time" placeholder="Time 09:00PM">
-<input id="goal" placeholder="Goal Line ဥပမာ 2.5 / 3+50">
-<input id="odds" placeholder="Odds ဥပမာ =40 / 2-80">
-<input id="result" placeholder="Result (ဥပမာ 2-1)">
+  <div class="formBox">
+    <input id="league" placeholder="League">
+    <input id="home" placeholder="Home Team">
+    <input id="away" placeholder="Away Team">
 
-<select id="status">
-  <option value="Open">Open</option>
-  <option value="Closed">Closed</option>
-</select>
+    <div class="row">
+      <input id="date" placeholder="Date 27/06/2026">
+      <input id="time" placeholder="Time 09:00PM">
+    </div>
 
-<button class="save" id="saveBtn">SAVE MATCH</button>
-<button class="update hidden" id="updateBtn">UPDATE MATCH</button>
+    <input id="goal" placeholder="Goal Line ဥပမာ 2+80 / 1-50">
+    <input id="odds" placeholder="Match Odds ဥပမာ 1+40 / 1-50">
+    <input id="result" placeholder="Result ဥပမာ 2-1">
 
-<input id="search" placeholder="Search match...">
-<div id="list"></div>
+    <select id="status">
+      <option value="Open">🟢 Open</option>
+      <option value="Closed">🟡 Closed</option>
+      <option value="Finished">🔴 Finished</option>
+    </select>
+
+    <button class="save" id="saveBtn">SAVE MATCH</button>
+    <button class="update hidden" id="updateBtn">UPDATE MATCH</button>
+  </div>
+
+  <input id="search" placeholder="Search match...">
+  <div id="list"><p class="small">Loading...</p></div>
 </div>
 
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
   getFirestore,
   collection,
-addDoc,
-onSnapshot,
-doc,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
   getDoc,
-updateDoc,
-deleteDoc,
-getDocs,
-query,
-where,
-serverTimestamp,
- increment, 
+  query,
+  where,
+  serverTimestamp,
+  increment
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -89,7 +190,10 @@ const db = getFirestore(app);
 
 let allMatches = [];
 let editId = null;
+
 const ids = x => document.getElementById(x);
+
+const money = n => "₩" + Number(n || 0).toLocaleString();
 
 function getData(){
   return {
@@ -113,6 +217,7 @@ function fill(m){
   ids("time").value = m.time || "";
   ids("goal").value = m.goal || "";
   ids("odds").value = m.odds || "";
+  ids("result").value = m.result || "";
   ids("status").value = m.status || "Open";
 }
 
@@ -151,6 +256,7 @@ ids("saveBtn").onclick = async ()=>{
       ...data,
       createdAt: serverTimestamp()
     });
+
     clearForm();
     alert("MATCH SAVED");
   }catch(e){
@@ -166,7 +272,9 @@ ids("updateBtn").onclick = async ()=>{
 
   try{
     await updateDoc(doc(db,"matches",editId), getData());
+
     await settleMatch(editId);
+
     clearForm();
     alert("MATCH UPDATED");
   }catch(e){
@@ -195,103 +303,75 @@ window.deleteMatch = async function(id){
   }
 };
   async function settleMatch(matchId){
-    const betQuery = query(
-    collection(db, "bets"),
-    where("matchId", "==", matchId),
-    where("status", "==", "Pending")
-);
+  const matchSnap = await getDoc(doc(db,"matches",matchId));
+  if(!matchSnap.exists()) return;
 
-const betSnap = await getDocs(betQuery);
+  const match = matchSnap.data();
+  if(!match.result) return;
 
-console.log("Pending Bets:", betSnap.size);
-    for (const betDoc of betSnap.docs) {
+  const [homeScore, awayScore] = match.result.split("-").map(Number);
+  if(isNaN(homeScore) || isNaN(awayScore)) return;
 
+  const betQuery = query(
+    collection(db,"bets"),
+    where("matchId","==",matchId),
+    where("status","==","Pending")
+  );
+
+  const betSnap = await getDocs(betQuery);
+
+  for(const betDoc of betSnap.docs){
     const bet = betDoc.data();
+    let status = "Lost";
 
-    const matchRef = doc(db, "matches", bet.matchId);
-    const matchSnap = await getDoc(matchRef);
+    if(bet.betType==="Home" && homeScore>awayScore) status="Won";
+    if(bet.betType==="Away" && awayScore>homeScore) status="Won";
+    if(bet.betType==="Draw" && homeScore===awayScore) status="Won";
 
-    if (!matchSnap.exists()) continue;
+    const totalGoal = homeScore + awayScore;
 
-    const match = matchSnap.data();
+    if(bet.betType==="Over"){
+      const line = parseFloat((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+      if(totalGoal > line) status="Won";
+    }
 
-    const result = match.result || "";
+    if(bet.betType==="Under"){
+      const line = parseFloat((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+      if(totalGoal < line) status="Won";
+    }
 
-    const [homeScore, awayScore] = result.split("-").map(Number);
+    const stake = Number(bet.stake || 0);
+    let winAmount = 0;
 
-    console.log(homeScore, awayScore);
-      let status = "Lost";
+    if(status==="Won"){
+      const oddText = (bet.betType==="Over" || bet.betType==="Under")
+        ? (bet.goalOdd || bet.goal || "")
+        : (bet.matchOdd || bet.odds || "");
 
-if (bet.betType === "Home" && homeScore > awayScore) {
-  status = "Won";
-}
+      const found = oddText.match(/[+-]\d+/);
+      let percent = 100;
+      if(found) percent = Number(found[0]);
 
-if (bet.betType === "Away" && awayScore > homeScore) {
-  status = "Won";
-}
+      if(oddText.includes("+")){
+        winAmount = stake + (stake * percent / 100);
+      }else if(oddText.includes("-")){
+        winAmount = stake - (stake * Math.abs(percent) / 100);
+      }else{
+        winAmount = stake * 2;
+      }
 
-if (bet.betType === "Draw" && homeScore === awayScore) {
-  status = "Won";
-}
+      await updateDoc(doc(db,"users",bet.userId),{
+        balance: increment(winAmount)
+      });
+    }
 
-const totalGoal = homeScore + awayScore;
-
-if (bet.betType === "Over") {
-  const line = Number((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
-  if (totalGoal > line) status = "Won";
-}
-
-if (bet.betType === "Under") {
-  const line = Number((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
-  if (totalGoal < line) status = "Won";
-}
-
-console.log("Bet Result:", bet.betType, status);
-  const stake = Number(bet.stake || 0);
-let winAmount = 0;
-
-if (status === "Won") {
-  const oddText =
-    (bet.betType === "Over" || bet.betType === "Under")
-      ? (bet.goalOdd || bet.goal || "")
-      : (bet.matchOdd || bet.odds || "");
-
-  const found = oddText.match(/[+-]\d+/);
-  let percent = 100;
-
-  if (found) {
-    percent = Number(found[0]);
+    await updateDoc(doc(db,"bets",betDoc.id),{
+      status: status,
+      winAmount: winAmount,
+      settledPaid: true,
+      settledAt: new Date()
+    });
   }
-
-  if (oddText.includes("+")) {
-    winAmount = stake + (stake * percent / 100);
-  } else if (oddText.includes("-")) {
-    winAmount = stake - (stake * Math.abs(percent) / 100);
-  } else {
-    winAmount = stake * 2;
-  }
-
-  await updateDoc(doc(db, "users", bet.userId), {
-    balance: increment(winAmount)
-  });
-}
-
-await updateDoc(doc(db, "bets", betDoc.id), {
-  status: status,
-  winAmount: winAmount,
-  settledPaid: true,
-  settledAt: new Date()
-});    
- 
-
-await updateDoc(doc(db, "bets", betDoc.id), {
-  status: status,
-  winAmount: winAmount,
-  settledPaid: true,
-  settledAt: new Date()
-});     
-}
-
 }
 
 function render(){
@@ -308,16 +388,18 @@ function render(){
     (m.status||"")
   ).toLowerCase().includes(q))
   .forEach(m=>{
-    const statusClass = m.status === "Closed" ? "closed" : "open";
+    const statusClass =
+      m.status==="Finished" ? "statusFinished" :
+      m.status==="Closed" ? "statusClosed" : "statusOpen";
 
     html += `
     <div class="card">
-      <b>⚽ ${m.home || "-"} vs ${m.away || "-"}</b>
-      <p>🏆 League : ${m.league || "-"}</p>
-      <p>📅 Date : ${m.date || "-"} | ⏰ ${m.time || "-"}</p>
+      <div class="matchName">⚽ ${m.home || "-"} VS ${m.away || "-"}</div>
+      <p>🏆 League : <span class="gold">${m.league || "-"}</span></p>
+      <p>📅 ${m.date || "-"} | ⏰ ${m.time || "-"}</p>
       <p>🥅 Goal : ${m.goal || "-"}</p>
       <p>💰 Odds : ${m.odds || "-"}</p>
-      <p>📊 Result : ${m.result || "-"}</p>
+      <p>📊 Result : <span class="yellow">${m.result || "-"}</span></p>
       <p>Status : <b class="${statusClass}">${m.status || "Open"}</b></p>
 
       <button class="edit" onclick="editMatch('${m.id}')">EDIT</button>
@@ -332,7 +414,7 @@ ids("search").oninput = render;
 
 onSnapshot(collection(db,"matches"), snap=>{
   allMatches = [];
-  snap.forEach(d => allMatches.push({id:d.id,...d.data()}));
+  snap.forEach(d=> allMatches.push({id:d.id,...d.data()}));
   render();
 });
 </script>
