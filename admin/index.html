@@ -344,12 +344,12 @@ window.deleteMatch = async function(id){
     const totalGoal = homeScore + awayScore;
 
     if(bet.betType==="Over"){
-      const line = parseFloat((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+      const line = parseAsianLine(bet.goalOdd || bet.goal);
       if(totalGoal > line) status="Won";
     }
 
     if(bet.betType==="Under"){
-      const line = parseFloat((bet.goalOdd || bet.goal || "0").split(/[+-]/)[0]);
+      const line = parseAsianLine(bet.goalOdd || bet.goal);
       if(totalGoal < line) status="Won";
     }
 
