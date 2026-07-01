@@ -104,8 +104,8 @@ window.setStatus = async (id,status)=>{
         return;
       }
 
-      const winAmount =
-Number(document.getElementById("win_"+id).value || bet.winAmount || 0);
+      const winAmount = Number(document.getElementById("win_"+id).value || 0);
+const result = document.getElementById("result_"+id).value;
       const userRef = doc(db,"users",bet.userId);
 
       await updateDoc(userRef,{
@@ -115,7 +115,7 @@ Number(document.getElementById("win_"+id).value || bet.winAmount || 0);
      await updateDoc(betRef,{
   status:"Won",
   winAmount: winAmount,
-  result: document.getElementById("result_"+id).value,
+  result: result,
   settledPaid: true,
   settledAt: new Date()
 });
