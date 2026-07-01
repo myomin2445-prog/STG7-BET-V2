@@ -104,20 +104,21 @@ window.setStatus = async (id,status)=>{
         return;
       }
 
-      const stake = Number(bet.stake || 0);
-      const winAmount = stake * 2;
+      const winAmount =
+Number(document.getElementById("win_"+id).value || bet.winAmount || 0);
       const userRef = doc(db,"users",bet.userId);
 
       await updateDoc(userRef,{
         balance: increment(winAmount)
       });
 
-      await updateDoc(betRef,{
-        status:"Won",
-        winAmount: winAmount,
-        settledPaid: true,
-        settledAt: new Date()
-      });
+     await updateDoc(betRef,{
+  status:"Won",
+  winAmount: winAmount,
+  result: document.getElementById("result_"+id).value,
+  settledPaid: true,
+  settledAt: new Date()
+});
 
       alert("WON ✅ Wallet +₩" + winAmount.toLocaleString());
     }
