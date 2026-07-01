@@ -101,7 +101,7 @@ onSnapshot(collection(db,"matches"), snap=>{
         <div class="match">⚽ ${m.home || ""} vs ${m.away || ""}</div>
         <div class="info">🏆 ${m.league || m.body || "League"}</div>
         <div class="info">📅 ${m.date || ""} ⏰ ${m.time || m.kr || ""}</div>
-        <div class="info goal">ဂိုးလိုင်း: ${m.goal || "-"}</div>
+        <div class="info goal">Result: ${m.result || "Pending"}</div>
         <div class="info odds">ပေါက်ကြေး: ${m.odds || m.body || "-"}</div>
         <button onclick="location.href='bet.html'">BET</button>
       </div>
