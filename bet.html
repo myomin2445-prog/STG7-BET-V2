@@ -48,7 +48,27 @@ input,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box
     <div class="user" id="userBox">Checking login...</div>
     <div class="balance" id="balanceBox">Balance: Loading...</div>
   </div>
+#liveAction{
+  background:#111;
+  color:#ffd700;
+  overflow:hidden;
+  white-space:nowrap;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+  font-weight:bold;
+}
 
+#liveAction span{
+  display:inline-block;
+  padding-left:100%;
+  animation:marquee 12s linear infinite;
+}
+
+@keyframes marquee{
+  from{transform:translateX(0);}
+  to{transform:translateX(-100%);}
+}
   <div id="matchList">
     <p class="small">Loading matches...</p>
   </div>
