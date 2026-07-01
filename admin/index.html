@@ -200,16 +200,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-document.getElementById("saveLiveBtn").onclick = async () => {
+const saveLiveBtn = document.getElementById("saveLiveBtn");
 
+if(saveLiveBtn){
+  saveLiveBtn.onclick = async () => {
     const text = document.getElementById("liveText").value;
 
     await setDoc(doc(db, "settings", "live"), {
-        text: text
+      text: text
     });
 
     alert("✅ Live Action Saved");
-};
+  };
+}
 let allMatches = [];
 let editId = null;
 
