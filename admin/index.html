@@ -392,13 +392,6 @@ window.deleteMatch = async function(id){
       let percent = 100;
       if(found) percent = Number(found[0]);
 
-      const oddText = (bet.betType==="Over" || bet.betType==="Under")
-      ? (bet.goalOdd || bet.goal || "")
-      : (bet.matchOdd || bet.odds || "");
-
-const found = oddText.match(/[+-]\d+/);
-let percent = found ? Math.abs(Number(found[0])) : 100;
-
 // ဒီ bet က အထက်ကြေးလား?
 const isFavorite =
    (bet.betType==="Home" && match.favoriteTeam===match.home) ||
