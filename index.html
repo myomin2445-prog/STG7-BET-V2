@@ -47,7 +47,7 @@ button{width:100%;padding:13px;margin-top:10px;border:0;border-radius:9px;backgr
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCACJcBCTRQptANEsAU40dxtpRDnF2vQ3M",
@@ -61,7 +61,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const liveBox = document.getElementById("liveAction");
 
+onSnapshot(doc(db, "settings", "live"), (snap) => {
+    if (snap.exists()) {
+        liveBox.innerHTML = snap.data().text || "";
+    } else {
+        liveBox.innerHTML = "";
+    }
+});
 const userBox = document.getElementById("userBox");
 const balanceBox = document.getElementById("balanceBox");
 const matchList = document.getElementById("matchList");
