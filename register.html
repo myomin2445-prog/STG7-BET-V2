@@ -73,7 +73,7 @@ document.getElementById("registerBtn").onclick = async () => {
     await setDoc(doc(db, "users", uid), {
       uid: uid,
       email: email,
-      balance: 100000,
+      balance: 0,
       role: "user",
       createdAt: serverTimestamp()
     });
