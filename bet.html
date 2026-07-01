@@ -37,18 +37,7 @@ input,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box
 
 .nav{position:fixed;bottom:0;left:0;right:0;background:#101c10;border-top:1px solid #1f3d1f;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:8px 0;z-index:20}
 .nav a{text-align:center;color:white;text-decoration:none;font-size:13px}
-</style>
-</head>
-
-<body>
-
-<div class="box">
-  <div class="top">
-    <div class="title">⚽ STG7 SPORTS</div>
-    <div class="user" id="userBox">Checking login...</div>
-    <div class="balance" id="balanceBox">Balance: Loading...</div>
-  </div>
-#liveAction{
+  #liveAction{
   background:#111;
   color:#ffd700;
   overflow:hidden;
@@ -69,6 +58,20 @@ input,select{width:100%;padding:13px;margin:7px 0;border:0;border-radius:8px;box
   from{transform:translateX(0);}
   to{transform:translateX(-100%);}
 }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <div class="top">
+    <div class="title">⚽ STG7 SPORTS</div>
+    <div class="user" id="userBox">Checking login...</div>
+    <div class="balance" id="balanceBox">Balance: Loading...</div>
+  </div>
+  <div id="liveAction">
+  <span>Loading...</span>
+</div>
   <div id="matchList">
     <p class="small">Loading matches...</p>
   </div>
