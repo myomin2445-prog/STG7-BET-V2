@@ -341,7 +341,7 @@ onSnapshot(collection(db,"matches"), snap=>{
 </div>
 
         <div class="market">
-          <button onclick="openBetSheet('${d.id}','Home')" style="color:red">
+          <button onclick="openBetSheet('${d.id}','Home')" style="color:${m.favoriteTeam === m.home ? 'red' : 'white'}">
 ${m.home || "-"}
 </button>
 
@@ -349,7 +349,7 @@ ${m.home || "-"}
 ${m.odds || "-"}
 </button>
 
-<button onclick="openBetSheet('${d.id}','Away')">
+<button onclick="openBetSheet('${d.id}','Away')" style="color:${m.favoriteTeam === m.away ? 'red' : 'white'}">
 ${m.away || "-"}
 </button>
         </div>
