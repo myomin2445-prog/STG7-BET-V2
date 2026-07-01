@@ -198,7 +198,8 @@ let allMatches = [];
 let editId = null;
 
 const ids = x => document.getElementById(x);
-
+ids("home").oninput = refreshFavoriteTeam;
+ids("away").oninput = refreshFavoriteTeam;
 const money = n => "₩" + Number(n || 0).toLocaleString();
   function parseAsianLine(text){
   text = String(text || "").trim();
@@ -224,10 +225,28 @@ function getData(){
     goal: ids("goal").value.trim(),
     odds: ids("odds").value.trim(),
     result: ids("result").value.trim(),
+    favoriteTeam: ids("favoriteTeam").value,
     status: ids("status").value
   };
 }
+function refreshFavoriteTeam(){
 
+    const home = ids("home").value.trim();
+    const away = ids("away").value.trim();
+
+    const select = ids("favoriteTeam");
+
+    select.innerHTML = "";
+
+    if(home){
+        select.innerHTML += `<option value="${home}">${home}</option>`;
+    }
+
+    if(away){
+        select.innerHTML += `<option value="${away}">${away}</option>`;
+    }
+
+}
 function fill(m){
   ids("league").value = m.league || "";
   ids("home").value = m.home || "";
@@ -237,6 +256,8 @@ function fill(m){
   ids("goal").value = m.goal || "";
   ids("odds").value = m.odds || "";
   ids("result").value = m.result || "";
+  refreshFavoriteTeam();
+ids("favoriteTeam").value = m.favoriteTeam || "";
   ids("status").value = m.status || "Open";
 }
 
