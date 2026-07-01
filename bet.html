@@ -159,7 +159,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const liveSpan = document.querySelector("#liveAction span");
 
+onSnapshot(doc(db, "settings", "live"), (snap) => {
+  if (snap.exists()) {
+    liveSpan.innerText = snap.data().text || "";
+  }
+});
 let currentUser = null;
 let matchesData = [];
 let selectedMatchId = null;
