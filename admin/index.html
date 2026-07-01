@@ -382,44 +382,6 @@ window.deleteMatch = async function(id){
 
     const stake = Number(bet.stake || 0);
     let winAmount = 0;
-
-    if(status==="Won"){
-      const oddText = (bet.betType==="Over" || bet.betType==="Under")
-        ? (bet.goalOdd || bet.goal || "")
-        : (bet.matchOdd || bet.odds || "");
-
-      const found = oddText.match(/[+-]\d+/);
-      let percent = 100;
-      if(found) percent = Number(found[0]);
-
-// ဒီ bet က အထက်ကြေးလား?
-const isFavorite =
-   (bet.betType==="Home" && match.favoriteTeam===match.home) ||
-   (bet.betType==="Away" && match.favoriteTeam===match.away);
-
-if(oddText.includes("+")){
-    // +80
-    winAmount = stake + (stake * percent / 100);
-
-}else if(oddText.includes("-")){
-
-    if(isFavorite){
-        // အထက်ကြေး -80 => 20% ပဲပြန်
-        winAmount = stake - (stake * percent / 100);
-    }else{
-        // အောက်ကြေး +80 => 180%
-        winAmount = stake + (stake * percent / 100);
-    }
-
-}else{
-    winAmount = stake * 2;
-}
-
-      await updateDoc(doc(db,"users",bet.userId),{
-        balance: increment(winAmount)
-      });
-    }
-
     await updateDoc(doc(db,"bets",betDoc.id),{
       status: status,
       winAmount: winAmount,
