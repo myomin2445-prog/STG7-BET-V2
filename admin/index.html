@@ -194,6 +194,19 @@ let editId = null;
 const ids = x => document.getElementById(x);
 
 const money = n => "₩" + Number(n || 0).toLocaleString();
+  function parseAsianLine(text){
+  text = String(text || "").trim();
+
+  const base = parseInt(text);
+  if(isNaN(base)) return 0;
+
+  if(text.includes("+")) return base - 0.25;
+  if(text.includes("-50")) return base + 0.25;
+  if(text.endsWith("-")) return base + 0.5;
+  if(text.includes("=")) return base;
+
+  return base;
+}
 
 function getData(){
   return {
