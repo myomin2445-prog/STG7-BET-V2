@@ -336,11 +336,7 @@ onSnapshot(collection(db,"matches"), snap=>{
           <div class="mid">${m.result || "Pending"}</div>
           <div>${m.away || "-"}</div>
         </div>
-        <div class="result">
-    Result : ${m.result || "Pending"}
-</div>
-
-        <div class="market">
+   <div class="market">
           <button onclick="openBetSheet('${d.id}','Home')" style="color:${m.favoriteTeam === m.home ? 'red' : 'white'}">
 ${m.home || "-"}
 </button>
