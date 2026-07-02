@@ -185,11 +185,16 @@ if(!snap.exists()){
 
 const bet = snap.data();
 
-alert(
-"Type : " + bet.betType +
-"\nOdds : " + bet.odds +
-"\nStake : " + bet.stake
-);
+const odds = String(bet.odds).trim();
+const stake = Number(bet.stake);
+
+let win = 0;
+
+if (odds === "1-50") {
+    win = stake * 0.95;
+}
+
+alert("Win = " + win);
 
 };
 function render(){
