@@ -175,7 +175,21 @@ window.saveBet = async(id)=>{
 }
   window.calculateBet = async(id)=>{
 
-    alert("Calculate Ready");
+    const betRef = doc(db,"bets",id);
+const snap = await getDoc(betRef);
+
+if(!snap.exists()){
+    alert("Bet not found");
+    return;
+}
+
+const bet = snap.data();
+
+alert(
+"Type : " + bet.betType +
+"\nOdds : " + bet.odds +
+"\nStake : " + bet.stake
+);
 
 };
 function render(){
