@@ -109,8 +109,12 @@ const result = document.getElementById("result_"+id).value;
       const userRef = doc(db,"users",bet.userId);
 
       await updateDoc(userRef,{
-        balance: increment(winAmount)
-      });
+        const stake = Number(bet.stake || 0);
+const totalReturn = stake + winAmount;
+
+await updateDoc(userRef,{
+  balance: increment(totalReturn)
+});
 
      await updateDoc(betRef,{
   status:"Won",
@@ -120,7 +124,7 @@ const result = document.getElementById("result_"+id).value;
   settledAt: new Date()
 });
 
-      alert("WON ✅ Wallet +₩" + winAmount.toLocaleString());
+      alert("WON ✅ Wallet +₩" + totalReturn.toLocaleString());
     }
 
     if(status === "Lost"){
