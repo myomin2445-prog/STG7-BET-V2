@@ -217,6 +217,7 @@ function render(){
       <button class="pending" onclick="setStatus('${b.id}','Pending')">PENDING</button>
       <button class="won" onclick="setStatus('${b.id}','Won')">WON</button>
       <button class="lost" onclick="setStatus('${b.id}','Lost')">LOST</button>
+      <button onclick="calculateBet('${b.id}')">🧮 CALCULATE</button>
       <button onclick="saveBet('${b.id}')">💾 SAVE</button>
     </div>`;
   });
