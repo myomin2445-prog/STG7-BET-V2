@@ -187,8 +187,20 @@ const bet = snap.data();
 
 const odds = String(bet.odds).trim();
 const stake = Number(bet.stake);
+const result = String(
+    document.getElementById("result_"+id).value
+).trim();
 
+const score = result.split("-");
+
+const home = Number(score[0]);
+const away = Number(score[1]);
 let win = 0;
+    alert(
+"Home = " + home +
+"\nAway = " + away +
+"\nOdds = " + odds
+);
 
 if (odds === "1-50") {
     win = stake * 0.95;
