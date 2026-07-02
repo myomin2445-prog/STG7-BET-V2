@@ -206,7 +206,9 @@ if (odds === "1-50") {
     win = stake * 0.95;
 }
 
-alert("Win = " + win);
+document.getElementById("win_"+id).value = Math.round(win);
+
+alert("Calculated ✅ " + Math.round(win));
 
 };
 function render(){
