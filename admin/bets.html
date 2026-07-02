@@ -174,43 +174,9 @@ window.saveBet = async(id)=>{
 
 }
   window.calculateBet = async(id)=>{
-
-    const betRef = doc(db,"bets",id);
-const snap = await getDoc(betRef);
-
-if(!snap.exists()){
-    alert("Bet not found");
-    return;
-}
-
-const bet = snap.data();
-
-const odds = String(bet.odds).trim();
-const stake = Number(bet.stake);
-const result = String(
-    document.getElementById("result_"+id).value
-).trim();
-
-const score = result.split("-");
-
-const home = Number(score[0]);
-const away = Number(score[1]);
-let win = 0;
-    alert(
-"Home = " + home +
-"\nAway = " + away +
-"\nOdds = " + odds
-);
-
-if (odds === "1-50") {
-    win = stake * 0.95;
-}
-
-document.getElementById("win_"+id).value = Math.round(win);
-
-alert("Calculated ✅ " + Math.round(win));
-
+    alert("Calculate Ready");
 };
+
 function render(){
   const q = ids("search").value.toLowerCase();
   let html = "";
