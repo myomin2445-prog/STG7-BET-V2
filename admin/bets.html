@@ -108,8 +108,7 @@ window.setStatus = async (id,status)=>{
 const result = document.getElementById("result_"+id).value;
       const userRef = doc(db,"users",bet.userId);
 
-      await updateDoc(userRef,{
-        const stake = Number(bet.stake || 0);
+      const stake = Number(bet.stake || 0);
 const totalReturn = stake + winAmount;
 
 await updateDoc(userRef,{
