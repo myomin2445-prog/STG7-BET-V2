@@ -124,7 +124,8 @@ await updateDoc(userRef,{
 });
 
       alert("WON ✅ Wallet +₩" + totalReturn.toLocaleString());
-    }
+return;
+}
 
     if(status === "Lost"){
       await updateDoc(betRef,{
